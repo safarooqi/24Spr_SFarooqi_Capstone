@@ -1,0 +1,18 @@
+{
+  "Version": "000",
+  "Year": "2024",
+  "Semester": "Spring",
+  "project_name": "'The Most Racist City in America'\u2014How Boston, and beyond, gained its notorious reputation",
+  "Objective": " \n            Urban renewal was a phenomenon throughout the 20th century that led to the clearing of minority and immigrant communities \n            for highway projects through the 1950s and 60s. So, what has been the impact? How did FDRs redlining maps ultimately worsen \n            segregation in Massachusetts, so much so, there continues to be a racial divide in nearly every aspect of daily life? \n            From public schools, to health care access, to real estate, and poverty\u2014nearly every facet of life in Massachusetts is \n            dictated by race. Using state data, interviews, and historical research, I hope to produce a story-scrolling project \n            that tells the story of racial segregation in the state, specifically focusing how urban renewal and redlining has shaped \n            its evolution through the 20th and 21st centuries. \n            ",
+  "Dataset": "\n            I will be using several data sets in order to address different questions to undertake this project. The following topics \n            will be researched using the corresponding dataset:\n            - School segregation: Mass. Dept. of Education; ProPublica\n            - COVID-19 impact disparities: CDC, Mass.gov\n            - Real Estate / Redlining: Mass.gov \n            - Poverty & Unemployment: US Census; Bureau of Labor Statistics (BLS)\n            ",
+  "Rationale": "\n            The goal is to yield a data journalism project that details the underlying reasons how Boston, and the entire state of MA\n            has created systemic barriers in its institutions that result in a deep racial divide in access to at least four major areas of life:\n            1. Education\n            2. Employment \n            3. Real Estate\n            4. Health Care\n            ",
+  "Approach": "\n            In order to ultimately yield a story-scrolling data visualization project, I will do the following:\n\n            1. Import all data to an RStudio markdown file\n            2. Depending on the data, first undertake a statistical analysis \n            3. Then, create maps \n            4. Utilize proper storyscrolling package in R\n            5. Incorporate research & interviews between each visualization & subject   \n            ",
+  "Timeline": "\n            This a rough time line for this project (12 weeks total):  \n\n            - (2 Weeks) Initial research, data importing, & cleaning\n            - (2 Weeks) Research, and potentially interviewing \n            - (3 Weeks) Building visualizations  \n            - (2 Weeks) Writing story based on data research and interviews\n            - (1 Weeks) Final Presentation  \n            ",
+  "Expected Number Students": "\n            I'll be working on this project alone.\n            ",
+  "Possible Issues": "\n            I may be trying to take on too many subjects in one project. May potentially need to narrow my focus. \n            May also need to reassess my data sources.\n            ",
+  "Proposed by": "Samiha Farooqi",
+  "Proposed by email": "ssfarooqi@gwu.edu",
+  "instructor": "Edwin Lo",
+  "instructor_email": "edwinlo@email.gwu.edu",
+  "github_repo": "https://github.com/safarooqi/24Spr_SFarooqi_Capstone"
+}
