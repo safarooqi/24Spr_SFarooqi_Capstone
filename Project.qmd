@@ -1,0 +1,92 @@
+```{r setup, include=FALSE, echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
+
+#install.packages("")
+
+library(tidyverse)
+library(tidycensus)
+library(tigris)
+library(sf) 
+library(tmap)
+library(dplyr)
+library(ggthemes)
+library(RColorBrewer)
+library(plotly)
+library(readxl)
+library(huxtable)
+library(table1)
+library(kableExtra)
+library(readxl)
+
+```
+
+## The Background
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, include = FALSE}
+
+census_api_key("c9264540e1e33a3c55dacba891cde5dd6a5ebb5e", overwrite = TRUE)
+
+tmap_mode("view")
+
+#v = load_variables(2022, "acs1", cache = TRUE)
+#View(v)
+
+#B05010_002 - total ratio for income to poverty level, children under 18
+#B05010_003 - two parents
+#B05010_004 - two parents native
+#B05010_005 - two parents foreign born
+#B05010_006 - one native one foreign born parents
+#B05010_007 - one parent
+#B05010_008 - one parent native
+#B05010_009 - one parent foreign born
+
+my_variables1 = c(
+  twoparentsn = "B05010_004",
+  twoparentsf = "B05010_005"
+)
+
+d_acs = get_acs(
+  geography = "county",
+  variables = my_variables1, 
+  state = "MA",
+  year = 2022,
+  survey = "acs1",
+  geometry = TRUE,
+  resolution = "20m")
+
+map1 = tm_shape(d_acs, projection="+proj=eck4") + 
+  tm_polygons("estimate",
+              n = 6,
+              id = "NAME",
+              palette = "Greens",
+              title = "ACS Estimate",
+              legend.hist = TRUE,
+              alpha = 0.7, 
+              breaks = c(0, 40000, 120000, 200000, 350000, 600000, 1000000, 1500000)) + 
+  tm_borders(lwd = .50, 
+             col = "black",
+             alpha = 1) +
+  tm_layout(inner.margins=c(0,0,.1,0), 
+            title.size=.8,
+            title = "Poverty Level Amongst Children under 18, Native vs Foriegn born",
+            frame = TRUE,
+            legend.outside = TRUE,
+            legend.hist.width = 5,
+            fontfamily = "Helvetica") 
+
+```
+
+
+```{r, fig.height=7, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
+
+map1 + tm_view(set.view = c(-105, 48, 3))
+
+
+```
+
+```{r}
+
+d_enrollment = read_excel("enrollmentbyracegender.xlsx")
+
+
+
+```
