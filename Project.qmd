@@ -57,7 +57,7 @@ map1 = tm_shape(d_acs, projection="+proj=eck4") +
   tm_polygons("estimate",
               n = 6,
               id = "NAME",
-              palette = "Greens",
+              palette = "Blues",
               title = "ACS Estimate",
               legend.hist = TRUE,
               alpha = 0.7, 
@@ -75,7 +75,6 @@ map1 = tm_shape(d_acs, projection="+proj=eck4") +
 
 ```
 
-
 ```{r, fig.height=7, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
 
 map1 + tm_view(set.view = c(-105, 48, 3))
@@ -87,6 +86,33 @@ map1 + tm_view(set.view = c(-105, 48, 3))
 
 d_enrollment = read_excel("enrollmentbyracegender.xlsx")
 
+colnames(d_enrollment) = as.character(d_enrollment[1,])
 
+d_enrollment = d_enrollment[-1,]
 
+d_enrollment = d_enrollment %>%
+  rename("district_name" = "District Name",
+         "district_code" = "District Code", 
+         "Black" = "African American",
+         "Native_American" = "Native American",
+         "Pacific_Islander" = "Native Hawaiian, Pacific Islander",
+         "Multi_Race" = "Multi-Race, Non-Hispanic",
+         "Non_Binary" = "Non-Binary")
+
+d_enrollment = mutate(d_enrollment, Black = as.numeric(Black),
+                        Asian = as.numeric(Asian),
+                        Hispanic = as.numeric(Hispanic),
+                        White = as.numeric(White),
+                        Native_American = as.numeric(Native_American),
+                        Pacific_Islander = as.numeric(Pacific_Islander),
+                        Multi_Race = as.numeric(Multi_Race), 
+                        Males = as.numeric(Males),
+                        Females = as.numeric(Females),
+                        Non_Binary = as.numeric(Non_Binary))
+
+plot1 = plot(d_enrollment$White)
+plot1
+                        
+plot2 = plot(d_enrollment$Black)
+plot2                     
 ```
