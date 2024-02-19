@@ -82,6 +82,50 @@ map1 + tm_view(set.view = c(-105, 48, 3))
 
 ```
 
+```{r, echo=FALSE, message=FALSE, warning=FALSE, include = FALSE}
+
+census_api_key("c9264540e1e33a3c55dacba891cde5dd6a5ebb5e", overwrite = TRUE)
+
+tmap_mode("view")
+
+v = load_variables(2022, "acs1", cache = TRUE)
+View(v)
+
+# B11012_003 = Married-couple household, With children of the householder under 18 years
+# B11012_010 = Female householder, With children of the householder under 18 years
+#	B11012_015 = Male householder, With children of the householder under 18 years
+# B11017_001 = multi-generational households, total
+
+# B17010B_004 = Poverty Status in the Past 12 Months Married-couple family With related children under 18                  years (Black or African American Alone Householder)
+# B17010A_024 = Poverty Status in the Past 12 Months Married-couple family With related children under 18                  years (white)
+# B17010C_024 = Poverty Status in the Past 12 Months Married-couple family With related children under 18                  years (Native American)
+# B17010D_024 = Poverty Status in the Past 12 Months Married-couple family With related children under 18                  years (Asian)
+# B17010G_024 = Poverty Status in the Past 12 Months Married-couple family With related children under 18                  years (two or more races)
+# B17010I_004 = Poverty Status in the Past 12 Months Married-couple family With related children under 18                  years (hispanic)
+
+# B17018_005 = Income in the past 12 months below poverty level, Married-couple family, High school                       graduate (includes equivalency)
+# B17018_006 = Income in the past 12 months below poverty level, Married-couple family, Some college,                      associate's degree
+# B17018_007 = Income in the past 12 months below poverty level, Married-couple family, Bachelor's degree                 or higher
+
+# B17019_004 = Income in the past 12 months below poverty level, Married-couple family, Owner occupied
+# B17019_005 = Income in the past 12 months below poverty level, Married-couple family, Renter occupied
+
+# B25012_011 = Renter-occupied housing units With related children of the householder under 18:
+
+# B19001A_001 = Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (White)
+# B19001B_001 = Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (Black)
+# B19001C_001 = native
+# B19001D_001 = asian 
+# B19001I_001 = hispanic
+# B19001_001 = average
+
+
+```
+
+```{r, fig.height=7, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
+
+```
+
 ```{r}
 
 d_enrollment = read_excel("enrollmentbyracegender.xlsx")
