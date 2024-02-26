@@ -88,8 +88,8 @@ census_api_key("c9264540e1e33a3c55dacba891cde5dd6a5ebb5e", overwrite = TRUE)
 
 tmap_mode("view")
 
-v = load_variables(2022, "acs1", cache = TRUE)
-View(v)
+#v = load_variables(2022, "acs1", cache = TRUE)
+#View(v)
 
 # B11012_003 = Married-couple household, With children of the householder under 18 years
 # B11012_010 = Female householder, With children of the householder under 18 years
@@ -103,12 +103,53 @@ View(v)
 # B17010G_024 = Poverty Status in the Past 12 Months Married-couple family With related children under 18                  years (two or more races)
 # B17010I_004 = Poverty Status in the Past 12 Months Married-couple family With related children under 18                  years (hispanic)
 
-# B17018_005 = Income in the past 12 months below poverty level, Married-couple family, High school                       graduate (includes equivalency)
-# B17018_006 = Income in the past 12 months below poverty level, Married-couple family, Some college,                      associate's degree
-# B17018_007 = Income in the past 12 months below poverty level, Married-couple family, Bachelor's degree                 or higher
 
-# B17019_004 = Income in the past 12 months below poverty level, Married-couple family, Owner occupied
-# B17019_005 = Income in the past 12 months below poverty level, Married-couple family, Renter occupied
+my_variables2 = c(
+  households = "B11012_003"
+  )
+
+d_acs = get_acs(
+  geography = "county",
+  variables = my_variables2, 
+  state = "MA",
+  year = 2022,
+  survey = "acs1",
+  geometry = TRUE,
+  resolution = "20m")
+
+map2 = tm_shape(d_acs, projection="+proj=eck4") + 
+  tm_polygons("estimate",
+              n = 6,
+              id = "NAME",
+              palette = "Blues",
+              title = "ACS Estimate",
+              legend.hist = TRUE,
+              alpha = 0.7, 
+              breaks = c(0, 40000, 120000, 200000, 350000, 600000, 1000000, 1500000)) + 
+  tm_borders(lwd = .50, 
+             col = "black",
+             alpha = 1) +
+  tm_layout(inner.margins=c(0,0,.1,0), 
+            title.size=.8,
+            title = "Households with Children Under 18",
+            frame = TRUE,
+            legend.outside = TRUE,
+            legend.hist.width = 5,
+            fontfamily = "Helvetica") 
+
+```
+
+```{r, fig.height=7, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
+
+map2 + tm_view(set.view = c(-105, 48, 3))
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, include = FALSE}
+
+census_api_key("c9264540e1e33a3c55dacba891cde5dd6a5ebb5e", overwrite = TRUE)
+
+tmap_mode("view")
 
 # B25012_011 = Renter-occupied housing units With related children of the householder under 18:
 
@@ -119,10 +160,57 @@ View(v)
 # B19001I_001 = hispanic
 # B19001_001 = average
 
+my_variables3 = c(
+  income_white = "B19001B_001",
+  income_black = "B19001A_001"
+  )
+
+d_acs = get_acs(
+  geography = "county",
+  variables = my_variables1, 
+  state = "MA",
+  year = 2022,
+  survey = "acs1",
+  geometry = TRUE,
+  resolution = "20m")
+
+map3 = tm_shape(d_acs, projection="+proj=eck4") + 
+  tm_polygons("estimate",
+              n = 6,
+              id = "NAME",
+              palette = "Blues",
+              title = "ACS Estimate",
+              legend.hist = TRUE,
+              alpha = 0.7, 
+              breaks = c(0, 40000, 120000, 200000, 350000, 600000, 1000000, 1500000)) + 
+  tm_borders(lwd = .50, 
+             col = "black",
+             alpha = 1) +
+  tm_layout(inner.margins=c(0,0,.1,0), 
+            title.size=.8,
+            title = "Household Income of Black vs White families in MA",
+            frame = TRUE,
+            legend.outside = TRUE,
+            legend.hist.width = 5,
+            fontfamily = "Helvetica") 
 
 ```
 
 ```{r, fig.height=7, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
+
+
+map3 + tm_view(set.view = c(-105, 48, 3))
+
+```
+
+```{r}
+
+# B17018_005 = Income in the past 12 months below poverty level, Married-couple family, High school                       graduate (includes equivalency)
+# B17018_006 = Income in the past 12 months below poverty level, Married-couple family, Some college,                      associate's degree
+# B17018_007 = Income in the past 12 months below poverty level, Married-couple family, Bachelor's degree                 or higher
+
+# B17019_004 = Income in the past 12 months below poverty level, Married-couple family, Owner occupied
+# B17019_005 = Income in the past 12 months below poverty level, Married-couple family, Renter occupied
 
 ```
 
