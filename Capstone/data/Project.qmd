@@ -39,14 +39,14 @@ tmap_mode("view")
 #B05010_008 - one parent native
 #B05010_009 - one parent foreign born
 
-my_variables1 = c(
-  twoparentsn = "B05010_004",
-  twoparentsf = "B05010_005"
-)
+
+twoparentsn = "B05010_004"
+twoparentsf = "B05010_005"
+
 
 d_acs = get_acs(
   geography = "county",
-  variables = my_variables1, 
+  variables = twoparentsn, 
   state = "MA",
   year = 2022,
   survey = "acs1",
@@ -67,11 +67,11 @@ map1 = tm_shape(d_acs, projection="+proj=eck4") +
              alpha = 1) +
   tm_layout(inner.margins=c(0,0,.1,0), 
             title.size=.8,
-            title = "Poverty Level Amongst Children under 18, Native vs Foriegn born",
+            title = "Poverty Level Amongst Native Born Children under 18",
             frame = TRUE,
             legend.outside = TRUE,
             legend.hist.width = 5,
-            fontfamily = "Helvetica") 
+            fontfamily = "Helvetica")
 
 ```
 
@@ -79,6 +79,65 @@ map1 = tm_shape(d_acs, projection="+proj=eck4") +
 
 map1 + tm_view(set.view = c(-105, 48, 3))
 
+
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, include = FALSE}
+
+census_api_key("c9264540e1e33a3c55dacba891cde5dd6a5ebb5e", overwrite = TRUE)
+
+tmap_mode("view")
+
+#v = load_variables(2022, "acs1", cache = TRUE)
+#View(v)
+
+#B05010_002 - total ratio for income to poverty level, children under 18
+#B05010_003 - two parents
+#B05010_004 - two parents native
+#B05010_005 - two parents foreign born
+#B05010_006 - one native one foreign born parents
+#B05010_007 - one parent
+#B05010_008 - one parent native
+#B05010_009 - one parent foreign born
+
+
+twoparentsn = "B05010_004"
+twoparentsf = "B05010_005"
+
+d_acs = get_acs(
+  geography = "county",
+  variables = twoparentsf, 
+  state = "MA",
+  year = 2022,
+  survey = "acs1",
+  geometry = TRUE,
+  resolution = "20m")
+
+map2 = tm_shape(d_acs, projection="+proj=eck4") + 
+  tm_polygons("estimate",
+              n = 6,
+              id = "NAME",
+              palette = "Blues",
+              title = "ACS Estimate",
+              legend.hist = TRUE,
+              alpha = 0.7, 
+              breaks = c(0, 40000, 120000, 200000, 350000, 600000, 1000000, 1500000)) + 
+  tm_borders(lwd = .50, 
+             col = "black",
+             alpha = 1) +
+  tm_layout(inner.margins=c(0,0,.1,0), 
+            title.size=.8,
+            title = "Poverty Level Amongst Foreign Born Children under 18",
+            frame = TRUE,
+            legend.outside = TRUE,
+            legend.hist.width = 5,
+            fontfamily = "Helvetica")
+
+```
+
+```{r, fig.height=5, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
+
+map2 + tm_view(set.view = c(-105, 48, 3))
 
 ```
 
@@ -117,7 +176,7 @@ d_acs = get_acs(
   geometry = TRUE,
   resolution = "20m")
 
-map2 = tm_shape(d_acs, projection="+proj=eck4") + 
+map3 = tm_shape(d_acs, projection="+proj=eck4") + 
   tm_polygons("estimate",
               n = 6,
               id = "NAME",
@@ -141,7 +200,61 @@ map2 = tm_shape(d_acs, projection="+proj=eck4") +
 
 ```{r, fig.height=7, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
 
-map2 + tm_view(set.view = c(-105, 48, 3))
+map3 + tm_view(set.view = c(-105, 48, 3))
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, include = FALSE}
+
+census_api_key("c9264540e1e33a3c55dacba891cde5dd6a5ebb5e", overwrite = TRUE)
+
+tmap_mode("view")
+
+# B25012_011 = Renter-occupied housing units With related children of the householder under 18:
+
+# B19001A_001 = Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (White)
+# B19001B_001 = Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (Black)
+# B19001C_001 = native
+# B19001D_001 = asian 
+# B19001I_001 = hispanic
+# B19001_001 = average
+
+renter_children = "B25012_011"
+
+d_acs = get_acs(
+  geography = "county",
+  variables = renter_children, 
+  state = "MA",
+  year = 2022,
+  survey = "acs1",
+  geometry = TRUE,
+  resolution = "20m")
+
+map4 = tm_shape(d_acs, projection="+proj=eck4") + 
+  tm_polygons("estimate",
+              n = 6,
+              id = "NAME",
+              palette = "Blues",
+              title = "ACS Estimate",
+              legend.hist = TRUE,
+              alpha = 0.7, 
+              breaks = c(0, 40000, 120000, 200000, 350000, 600000, 1000000, 1500000)) + 
+  tm_borders(lwd = .50, 
+             col = "black",
+             alpha = 1) +
+  tm_layout(inner.margins=c(0,0,.1,0), 
+            title.size=.8,
+            title = "Number of Renter-occupied housing units With children under 18",
+            frame = TRUE,
+            legend.outside = TRUE,
+            legend.hist.width = 5,
+            fontfamily = "Helvetica") 
+
+```
+
+```{r, fig.height=7, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
+
+
+map4 + tm_view(set.view = c(-105, 48, 3))
 
 ```
 
@@ -160,21 +273,19 @@ tmap_mode("view")
 # B19001I_001 = hispanic
 # B19001_001 = average
 
-my_variables3 = c(
-  income_white = "B19001B_001",
-  income_black = "B19001A_001"
-  )
+income_white = "B19001A_001"
+income_black = "B19001B_001" 
 
 d_acs = get_acs(
   geography = "county",
-  variables = my_variables1, 
+  variables = income_white, 
   state = "MA",
   year = 2022,
   survey = "acs1",
   geometry = TRUE,
   resolution = "20m")
 
-map3 = tm_shape(d_acs, projection="+proj=eck4") + 
+map5 = tm_shape(d_acs, projection="+proj=eck4") + 
   tm_polygons("estimate",
               n = 6,
               id = "NAME",
@@ -188,7 +299,7 @@ map3 = tm_shape(d_acs, projection="+proj=eck4") +
              alpha = 1) +
   tm_layout(inner.margins=c(0,0,.1,0), 
             title.size=.8,
-            title = "Household Income of Black vs White families in MA",
+            title = "Household Income of White families in MA",
             frame = TRUE,
             legend.outside = TRUE,
             legend.hist.width = 5,
@@ -199,8 +310,64 @@ map3 = tm_shape(d_acs, projection="+proj=eck4") +
 ```{r, fig.height=7, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
 
 
-map3 + tm_view(set.view = c(-105, 48, 3))
+map5 + tm_view(set.view = c(-105, 48, 3))
 
+```
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, include = FALSE}
+
+census_api_key("c9264540e1e33a3c55dacba891cde5dd6a5ebb5e", overwrite = TRUE)
+
+tmap_mode("view")
+
+# B25012_011 = Renter-occupied housing units With related children of the householder under 18:
+
+# B19001A_001 = Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (White)
+# B19001B_001 = Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (Black)
+# B19001C_001 = native
+# B19001D_001 = asian 
+# B19001I_001 = hispanic
+# B19001_001 = average
+
+
+income_white = "B19001A_001"
+income_black = "B19001B_001" 
+
+d_acs = get_acs(
+  geography = "county",
+  variables = income_black, 
+  state = "MA",
+  year = 2022,
+  survey = "acs1",
+  geometry = TRUE,
+  resolution = "20m")
+
+map6 = tm_shape(d_acs, projection="+proj=eck4") + 
+  tm_polygons("estimate",
+              n = 6,
+              id = "NAME",
+              palette = "Blues",
+              title = "ACS Estimate",
+              legend.hist = TRUE,
+              alpha = 0.7, 
+              breaks = c(0, 40000, 120000, 200000, 350000, 600000, 1000000, 1500000)) + 
+  tm_borders(lwd = .50, 
+             col = "black",
+             alpha = 1) +
+  tm_layout(inner.margins=c(0,0,.1,0), 
+            title.size=.8,
+            title = "Household Income of Black families in MA",
+            frame = TRUE,
+            legend.outside = TRUE,
+            legend.hist.width = 5,
+            fontfamily = "Helvetica") 
+
+```
+
+```{r, fig.height=7, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
+
+
+map6 + tm_view(set.view = c(-105, 48, 3))
 ```
 
 ```{r}
@@ -211,6 +378,7 @@ map3 + tm_view(set.view = c(-105, 48, 3))
 
 # B17019_004 = Income in the past 12 months below poverty level, Married-couple family, Owner occupied
 # B17019_005 = Income in the past 12 months below poverty level, Married-couple family, Renter occupied
+
 
 ```
 
@@ -246,5 +414,73 @@ plot1 = plot(d_enrollment$White)
 plot1
                         
 plot2 = plot(d_enrollment$Black)
-plot2                     
+plot2  
+```
+
+```{r, echo=FALSE, fig.height = 7, fig.width = 8}
+
+#descriptive statistics
+
+table1::label(d_enrollment$White) = "Avg # of White Students in MA School Districts"
+dwt = table1::table1(~White, data = d_enrollment)
+
+t1kable(dwt) %>%
+  kable_styling(position = "center")
+
+```
+
+```{r, echo=FALSE, fig.height = 7, fig.width = 8}
+
+#descriptive statistics
+
+table1::label(d_enrollment$Black) = "Avg # of Black Students in MA School Districts"
+dbt = table1::table1(~Black, data = d_enrollment)
+
+t1kable(dbt) %>%
+  kable_styling(position = "center")
+
+```
+
+```{r, echo=FALSE, fig.height = 7, fig.width = 8}
+
+income_white = "B19001A_001"
+income_black = "B19001B_001" 
+
+b = get_acs(
+  geography = "county",
+  variables = "B19001B_001", 
+  state = "MA",
+  year = 2022,
+  survey = "acs1",
+  geometry = TRUE,
+  resolution = "20m")
+
+table1::label(b$estimate) = "Black Household Income, 2022"
+bt = table1::table1(~estimate, data = b)
+
+t1kable(pt) %>%
+  kable_styling(position = "center")
+
+```
+
+```{r, echo=FALSE, fig.height = 7, fig.width = 8}
+
+income_white = "B19001A_001"
+income_black = "B19001B_001" 
+
+w = get_acs(
+  geography = "county",
+  variables = "B19001A_001", 
+  state = "MA",
+  year = 2022,
+  survey = "acs1",
+  geometry = TRUE,
+  resolution = "20m")
+
+table1::label(w$estimate) = "White Household Income, 2022"
+wt = table1::table1(~estimate, data = w)
+
+t1kable(wt) %>%
+  kable_styling(position = "center")
+
 ```
