@@ -16,6 +16,7 @@ library(huxtable)
 library(table1)
 library(kableExtra)
 library(readxl)
+library(sjmisc)
 
 ```
 
@@ -482,5 +483,99 @@ wt = table1::table1(~estimate, data = w)
 
 t1kable(wt) %>%
   kable_styling(position = "center")
+
+```
+
+```{r}
+#year = 5 year average/trend
+
+gradtrends = read_excel("statetrends.xlsx")
+
+gradtrends = gradtrends %>% add_row(Group = 'Year',
+                                    '2021 4 yr' = as.numeric('2021'),
+                                    '2020 5 yr' = as.numeric('2020'),
+                                    '2019 5 yr' = as.numeric('2019'),
+                                    '2018 5yr' = as.numeric('2018'),
+                                    '2017 5yr' = as.numeric('2017'),
+                                    '2016 5yr' = as.numeric('2016'),
+                                    '2015 5yr' = as.numeric('2015'),
+                                    '2014 5yr' = as.numeric('2014'),
+                                    '2013 5yr' = as.numeric('2013'),
+                                    '2012 5yr' = as.numeric('2012'),
+                                    '2011 5yr' = as.numeric('2011'),
+                                    '2010 5yr' = '2010',
+                                    '2009 5yr' = '2009',
+                                    '2008 5yr' = '2008',
+                                    '2007 5yr' = '2007',
+                                    '2006 5yr' = '2006',
+                                    .before=1)
+
+
+ gradtrends_long = gradtrends %>% 
+   rotate_df()
+ 
+ colnames(gradtrends_long) = as.character(gradtrends_long[1,])
+ 
+  gradtrends_long = gradtrends_long[-1,]
+ 
+gradtrends_long = gradtrends_long %>%
+  rename("Black" = "African-American")
+
+gradtrends_long = gradtrends_long %>%
+  pivot_longer(c('Black', 'Asian', 'Hispanic', 'White'),
+               names_to = 'race',
+               values_to = 'grad_rate')
+
+gradtrends_long$grad_rate = as.numeric(gradtrends_long$grad_rate)
+
+```
+
+```{r, echo=FALSE, fig.height = 7, fig.width = 10, fig.align="center"}
+
+gradtrends_plot = gradtrends_long %>% 
+  ggplot(mapping = aes(x = Year, y = grad_rate, color = race, na.rm = TRUE)) +
+  geom_line(aes(group = race, fill = race)) +
+  labs(title = "Monthly U.S. Poverty Rates, 2020-21", 
+       caption = "Source: Source: Estimates from Columbia University Center on Poverty and Social Policy, 'Columbia Monthly Poverty Tracker'",
+       x = "Date",
+       y = "Graduation Rate",
+       # color = "Presence of ARP Relief"
+       ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1),
+        axis.text.y = element_text(vjust = 0.2, hjust= 0.5),
+        plot.title = element_text(hjust = 0.5), 
+        plot.caption = element_text(hjust = 0, face = "italic")) + 
+  scale_color_brewer(palette = "Accent") + 
+  scale_y_continuous(labels = function(y) paste0(y, '%'))
+
+gradtrends_plot
+
+# ggplotly(gradtrends_plot) %>% 
+#   layout(xaxis = list(
+#       rangeselector = list(
+#         buttons = list(
+#           list(
+#             count = 3,
+#             label = "3 mo",
+#             step = "month",
+#             stepmode = "backward"),
+#           list(
+#             count = 6,
+#             label = "6 mo",
+#             step = "month",
+#             stepmode = "backward"),
+#           list(
+#             count = 1,
+#             label = "1 yr",
+#             step = "year",
+#             stepmode = "backward"),
+#           list(
+#             count = 1,
+#             label = "YTD",
+#             step = "year",
+#             stepmode = "todate"),
+#           list(step = "all"))),
+#     rangeslider = list(type = "date")))
 
 ```
