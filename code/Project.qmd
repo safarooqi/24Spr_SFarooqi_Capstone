@@ -491,23 +491,36 @@ t1kable(wt) %>%
 
 gradtrends = read_excel("statetrends.xlsx")
 
+gradtrends$`2021 4 yr` = as.character(gradtrends$`2021 4 yr`)
+gradtrends$`2020 4 yr` = as.character(gradtrends$`2020 4 yr`)
+gradtrends$`2019 4 yr` = as.character(gradtrends$`2019 4 yr`)
+gradtrends$`2018 4yr` = as.character(gradtrends$`2018 4yr`)
+gradtrends$`2017 4yr` = as.character(gradtrends$`2017 4yr`)
+gradtrends$`2016 4yr` = as.character(gradtrends$`2016 4yr`)
+gradtrends$`2015 4yr` = as.character(gradtrends$`2015 4yr`)
+gradtrends$`2014 4yr` = as.character(gradtrends$`2014 4yr`)
+gradtrends$`2013 4yr` = as.character(gradtrends$`2013 4yr`)
+gradtrends$`2012 4yr` = as.character(gradtrends$`2012 4yr`)
+gradtrends$`2011 4yr` = as.character(gradtrends$`2011 4yr`)
+
+
 gradtrends = gradtrends %>% add_row(Group = 'Year',
-                                    '2021 4 yr' = as.numeric('2021'),
-                                    '2020 5 yr' = as.numeric('2020'),
-                                    '2019 5 yr' = as.numeric('2019'),
-                                    '2018 5yr' = as.numeric('2018'),
-                                    '2017 5yr' = as.numeric('2017'),
-                                    '2016 5yr' = as.numeric('2016'),
-                                    '2015 5yr' = as.numeric('2015'),
-                                    '2014 5yr' = as.numeric('2014'),
-                                    '2013 5yr' = as.numeric('2013'),
-                                    '2012 5yr' = as.numeric('2012'),
-                                    '2011 5yr' = as.numeric('2011'),
-                                    '2010 5yr' = '2010',
-                                    '2009 5yr' = '2009',
-                                    '2008 5yr' = '2008',
-                                    '2007 5yr' = '2007',
-                                    '2006 5yr' = '2006',
+                                    '2021 4 yr' = '2021',
+                                    '2020 4 yr' = '2020',
+                                    '2019 4 yr' = '2019',
+                                    '2018 4yr' = '2018',
+                                    '2017 4yr' = '2017',
+                                    '2016 4yr' = '2016',
+                                    '2015 4yr' = '2015',
+                                    '2014 4yr' = '2014',
+                                    '2013 4yr' = '2013',
+                                    '2012 4yr' = '2012',
+                                    '2011 4yr' = '2011',
+                                    '2010 4yr' = '2010',
+                                    '2009 4 yr' = '2009',
+                                    '2008 4yr' = '2008',
+                                    '2007 4yr' = '2007',
+                                    '2006 4yr' = '2006',
                                     .before=1)
 
 
@@ -528,18 +541,22 @@ gradtrends_long = gradtrends_long %>%
 
 gradtrends_long$grad_rate = as.numeric(gradtrends_long$grad_rate)
 
+gradtrends_long$Year = as.character(gradtrends_long$Year)
+
+
 ```
 
 ```{r, echo=FALSE, fig.height = 7, fig.width = 10, fig.align="center"}
 
 gradtrends_plot = gradtrends_long %>% 
+  drop_na(gradtrends_long$Year) %>% 
   ggplot(mapping = aes(x = Year, y = grad_rate, color = race, na.rm = TRUE)) +
   geom_line(aes(group = race, fill = race)) +
-  labs(title = "Monthly U.S. Poverty Rates, 2020-21", 
-       caption = "Source: Source: Estimates from Columbia University Center on Poverty and Social Policy, 'Columbia Monthly Poverty Tracker'",
+  labs(title = "MA High School Graduation Rate, 2006-2020", 
+       caption = "Source: MA DESE",
        x = "Date",
        y = "Graduation Rate",
-       # color = "Presence of ARP Relief"
+       color = "4-year Graduation Rates by Race"
        ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1),
