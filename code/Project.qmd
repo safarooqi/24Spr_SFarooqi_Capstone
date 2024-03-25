@@ -17,6 +17,10 @@ library(table1)
 library(kableExtra)
 library(readxl)
 library(sjmisc)
+library(mapboxapi)
+library(tmap)
+
+mb_access_token("sk.eyJ1Ijoic2FtaWhhZiIsImEiOiJjbHU3Zno0YWYwNjFkMmpuMGR0emlodjJiIn0.OsHYgeCC11tk09PVtKbtBg", overwrite=TRUE, install = TRUE)
 
 ```
 
@@ -543,13 +547,14 @@ gradtrends_long$grad_rate = as.numeric(gradtrends_long$grad_rate)
 
 gradtrends_long$Year = as.character(gradtrends_long$Year)
 
+#shiny app project
+
 
 ```
 
 ```{r, echo=FALSE, fig.height = 7, fig.width = 10, fig.align="center"}
 
 gradtrends_plot = gradtrends_long %>% 
-  drop_na(gradtrends_long$Year) %>% 
   ggplot(mapping = aes(x = Year, y = grad_rate, color = race, na.rm = TRUE)) +
   geom_line(aes(group = race, fill = race)) +
   labs(title = "MA High School Graduation Rate, 2006-2020", 
@@ -594,5 +599,71 @@ gradtrends_plot
 #             stepmode = "todate"),
 #           list(step = "all"))),
 #     rangeslider = list(type = "date")))
+```
+
+```{r}
+ 
+plymouth_income <- get_acs(
+  geography = "tract",
+  variables = "B19013_001",
+  state = "MA",
+  county = "Plymouth",
+  geometry = TRUE,
+  year = 2021)
+ 
+```
+
+```{r, echo=FALSE, fig.height = 7, fig.width = 10, fig.align="center"}
+
+mb_access_token("sk.eyJ1Ijoic2FtaWhhZiIsImEiOiJjbHU3Zno0YWYwNjFkMmpuMGR0emlodjJiIn0.OsHYgeCC11tk09PVtKbtBg", overwrite=TRUE, install = TRUE)
+
+plymouth_tiles <- get_static_tiles(
+  location = plymouth_income,
+  zoom = 9,
+  style_id = "light-v9",
+  username = "mapbox",
+  access_token = "sk.eyJ1Ijoic2FtaWhhZiIsImEiOiJjbHU3Zno0YWYwNjFkMmpuMGR0emlodjJiIn0.OsHYgeCC11tk09PVtKbtBg")
+
+tm_shape(plymouth_tiles) + 
+  tm_rgb() + 
+  tm_shape(plymouth_income) + 
+  tm_polygons(col = "estimate",  
+              alpha = 0.5, palette = "cividis", 
+              title = "Median household income\n2021 ACS") + 
+  tm_layout(legend.outside = TRUE) + 
+  tm_credits("Basemap © Mapbox, © OpenStreetMap", position = c("RIGHT", "BOTTOM"))
+
+```
+
+```{r}
+
+norfolk_income <- get_acs(
+  geography = "tract",
+  variables = "B19013_001",
+  state = "MA",
+  county = "Norfolk",
+  geometry = TRUE,
+  year = 2021)
+
+```
+
+```{r}
+
+norfolk_tiles <- get_static_tiles(
+  location = norfolk_income,
+  zoom = 9,
+  style_id = "light-v9",
+  username = "mapbox",
+  access_token = "sk.eyJ1Ijoic2FtaWhhZiIsImEiOiJjbHU3Zno0YWYwNjFkMmpuMGR0emlodjJiIn0.OsHYgeCC11tk09PVtKbtBg")
+
+tm_shape(norfolk_tiles) + 
+  tm_rgb() + 
+  tm_shape(norfolk_income) + 
+  tm_polygons(col = "estimate",  
+              alpha = 0.5, palette = "cividis", 
+              title = "Median household income\n2021 ACS") + 
+  tm_layout(legend.outside = TRUE) + 
+  tm_credits("Basemap © Mapbox, © OpenStreetMap", position = c("RIGHT", "BOTTOM"))
+
 
 ```
