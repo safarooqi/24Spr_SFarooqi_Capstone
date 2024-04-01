@@ -19,6 +19,7 @@ library(readxl)
 library(sjmisc)
 library(mapboxapi)
 library(tmap)
+library(ggplot2)
 
 mb_access_token("sk.eyJ1Ijoic2FtaWhhZiIsImEiOiJjbHU3Zno0YWYwNjFkMmpuMGR0emlodjJiIn0.OsHYgeCC11tk09PVtKbtBg", overwrite=TRUE, install = TRUE)
 
@@ -325,8 +326,6 @@ census_api_key("c9264540e1e33a3c55dacba891cde5dd6a5ebb5e", overwrite = TRUE)
 
 tmap_mode("view")
 
-# B25012_011 = Renter-occupied housing units With related children of the householder under 18:
-
 # B19001A_001 = Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (White)
 # B19001B_001 = Household Income in the Past 12 Months (in 2022 Inflation-Adjusted Dollars) (Black)
 # B19001C_001 = native
@@ -377,6 +376,8 @@ map6 + tm_view(set.view = c(-105, 48, 3))
 
 ```{r}
 
+# B25012_011 = Renter-occupied housing units With related children of the householder under 18:
+
 # B17018_005 = Income in the past 12 months below poverty level, Married-couple family, High school                       graduate (includes equivalency)
 # B17018_006 = Income in the past 12 months below poverty level, Married-couple family, Some college,                      associate's degree
 # B17018_007 = Income in the past 12 months below poverty level, Married-couple family, Bachelor's degree                 or higher
@@ -384,6 +385,119 @@ map6 + tm_view(set.view = c(-105, 48, 3))
 # B17019_004 = Income in the past 12 months below poverty level, Married-couple family, Owner occupied
 # B17019_005 = Income in the past 12 months below poverty level, Married-couple family, Renter occupied
 
+income_rent_own = c("B17019_005", "B17019_004")
+
+h_acs = get_acs(
+  geography = "county",
+  variables = income_rent_own, 
+  state = "MA",
+  year = 2022,
+  survey = "acs1",
+  geometry = TRUE,
+  resolution = "20m")
+
+
+accumulate_by = function(dat, var) {
+  var = lazyeval::f_eval(var, dat)
+  lvls = plotly:::getLevels(var)
+  dats = lapply(seq_along(lvls), function(x) {
+    cbind(dat[var %in% lvls[seq(1, x)], ], frame = lvls[[x]])
+  })
+  dplyr::bind_rows(dats)
+}
+
+df = h_acs 
+rent_own_fig = df %>%
+  filter(df$variable, "B17019_005" == "renter", "B17019_004" == "owner")
+
+#rent_own_fig = rent_own_fig %>% accumulate_by(~date)
+
+
+rent_own_fig = rent_own_fig %>%
+  plot_ly(
+    x = ~date, 
+    y = ~median,
+    split = ~variables,
+    frame = ~frame, 
+    type = 'scatter',
+    mode = 'lines', 
+    line = list(simplyfy = F)
+  )
+rent_own_fig = rent_own_fig %>% layout(
+  xaxis = list(
+    title = "Date",
+    zeroline = F
+  ),
+  yaxis = list(
+    title = "Median",
+    zeroline = F
+  )
+) 
+rent_own_fig = rent_own_fig %>% animation_opts(
+  frame = 100, 
+  transition = 0, 
+  redraw = FALSE
+)
+rent_own_fig = rent_own_fig %>% animation_slider(
+  hide = T
+)
+rent_own_fig = rent_own_fig %>% animation_button(
+  x = 1, xanchor = "right", y = 0, yanchor = "bottom"
+)
+
+rent_own_fig
+
+```
+
+```{r}
+
+h_acs_wide = get_acs(
+  geography = "county",
+  variables = c(renter = "B17019_005", 
+                owner = "B17019_004"), 
+  state = "MA",
+  year = 2022,
+  survey = "acs1",
+  geometry = FALSE,
+  output = "wide")
+
+rent_bar_plot = h_acs_wide %>% 
+  mutate(NAME = str_remove(NAME, "County, Massachusetts")) %>% 
+  ggplot(aes(y = reorder(NAME, renterE), x = renterE)) +
+  geom_col() +  
+  theme_minimal() + 
+  labs(title = "Average Income for Renters by MA County", 
+       subtitle = "2022 1-year ACS estimates", 
+       y = "", 
+       x = "ACS estimate")
+
+rent_bar_plot
+
+```
+
+```{r}
+
+h_acs_wide = get_acs(
+  geography = "county",
+  variables = c(renter = "B17019_005", 
+                owner = "B17019_004"), 
+  state = "MA",
+  year = 2022,
+  survey = "acs1",
+  geometry = FALSE,
+  output = "wide")
+
+rent_bar_plot = h_acs_wide %>% 
+  mutate(NAME = str_remove(NAME, "County, Massachusetts")) %>% 
+  ggplot(aes(y = reorder(NAME, ownerE), x = ownerE)) +
+  geom_col(alpha = 0.5, width = 0.85) +  
+  theme_minimal() +
+  labs(title = "Average Income for Homeowners by MA County", 
+       subtitle = "2022 1-year ACS estimates", 
+       y = "", 
+       x = "ACS estimate")
+
+rent_bar_plot
 
 ```
 
@@ -414,12 +528,22 @@ d_enrollment = mutate(d_enrollment, Black = as.numeric(Black),
                         Males = as.numeric(Males),
                         Females = as.numeric(Females),
                         Non_Binary = as.numeric(Non_Binary))
+                        
+
+```
+
+```{r, echo=FALSE, fig.height = 7, fig.width = 8}
 
 plot1 = plot(d_enrollment$White)
 plot1
-                        
+
+```
+
+```{r, echo=FALSE, fig.height = 7, fig.width = 8}
+
 plot2 = plot(d_enrollment$Black)
 plot2  
+
 ```
 
 ```{r, echo=FALSE, fig.height = 7, fig.width = 8}
@@ -664,6 +788,15 @@ tm_shape(norfolk_tiles) +
               title = "Median household income\n2021 ACS") + 
   tm_layout(legend.outside = TRUE) + 
   tm_credits("Basemap © Mapbox, © OpenStreetMap", position = c("RIGHT", "BOTTOM"))
+
+
+```
+
+```{r}
+
+
+
+
 
 
 ```
