@@ -11,6 +11,7 @@ library(dplyr)
 library(ggthemes)
 library(RColorBrewer)
 library(plotly)
+library(gapminder)
 library(readxl)
 library(huxtable)
 library(table1)
@@ -83,7 +84,7 @@ map1 = tm_shape(d_acs, projection="+proj=eck4") +
 
 ```{r, fig.height=7, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
 
-map1 + tm_view(set.view = c(-105, 48, 3))
+map1 + tm_view(set.view = c(-71.5, 42.5, 7.4))
 
 
 ```
@@ -143,7 +144,7 @@ map2 = tm_shape(d_acs, projection="+proj=eck4") +
 
 ```{r, fig.height=5, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
 
-map2 + tm_view(set.view = c(-105, 48, 3))
+map2 + tm_view(set.view = c(-71.5, 42.5, 7.4))
 
 ```
 
@@ -206,7 +207,7 @@ map3 = tm_shape(d_acs, projection="+proj=eck4") +
 
 ```{r, fig.height=7, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
 
-map3 + tm_view(set.view = c(-105, 48, 3))
+map3 + tm_view(set.view = c(-71.5, 42.5, 7.4))
 ```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, include = FALSE}
@@ -249,7 +250,7 @@ map4 = tm_shape(d_acs, projection="+proj=eck4") +
              alpha = 1) +
   tm_layout(inner.margins=c(0,0,.1,0), 
             title.size=.8,
-            title = "Number of Renter-occupied housing units With children under 18",
+            title = "Renter-Occupied Housing With Children Under 18",
             frame = TRUE,
             legend.outside = TRUE,
             legend.hist.width = 5,
@@ -260,7 +261,7 @@ map4 = tm_shape(d_acs, projection="+proj=eck4") +
 ```{r, fig.height=7, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
 
 
-map4 + tm_view(set.view = c(-105, 48, 3))
+map4 + tm_view(set.view = c(-71.5, 42.5, 7.4))
 
 ```
 
@@ -316,7 +317,7 @@ map5 = tm_shape(d_acs, projection="+proj=eck4") +
 ```{r, fig.height=7, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
 
 
-map5 + tm_view(set.view = c(-105, 48, 3))
+map5 + tm_view(set.view = c(-71.5, 42.5, 7.4))
 
 ```
 
@@ -371,7 +372,7 @@ map6 = tm_shape(d_acs, projection="+proj=eck4") +
 ```{r, fig.height=7, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
 
 
-map6 + tm_view(set.view = c(-105, 48, 3))
+map6 + tm_view(set.view = c(-71.5, 42.5, 7.4))
 ```
 
 ```{r}
@@ -385,67 +386,6 @@ map6 + tm_view(set.view = c(-105, 48, 3))
 # B17019_004 = Income in the past 12 months below poverty level, Married-couple family, Owner occupied
 # B17019_005 = Income in the past 12 months below poverty level, Married-couple family, Renter occupied
 
-income_rent_own = c("B17019_005", "B17019_004")
-
-h_acs = get_acs(
-  geography = "county",
-  variables = income_rent_own, 
-  state = "MA",
-  year = 2022,
-  survey = "acs1",
-  geometry = TRUE,
-  resolution = "20m")
-
-
-accumulate_by = function(dat, var) {
-  var = lazyeval::f_eval(var, dat)
-  lvls = plotly:::getLevels(var)
-  dats = lapply(seq_along(lvls), function(x) {
-    cbind(dat[var %in% lvls[seq(1, x)], ], frame = lvls[[x]])
-  })
-  dplyr::bind_rows(dats)
-}
-
-df = h_acs 
-rent_own_fig = df %>%
-  filter(df$variable, "B17019_005" == "renter", "B17019_004" == "owner")
-
-#rent_own_fig = rent_own_fig %>% accumulate_by(~date)
-
-
-rent_own_fig = rent_own_fig %>%
-  plot_ly(
-    x = ~date, 
-    y = ~median,
-    split = ~variables,
-    frame = ~frame, 
-    type = 'scatter',
-    mode = 'lines', 
-    line = list(simplyfy = F)
-  )
-rent_own_fig = rent_own_fig %>% layout(
-  xaxis = list(
-    title = "Date",
-    zeroline = F
-  ),
-  yaxis = list(
-    title = "Median",
-    zeroline = F
-  )
-) 
-rent_own_fig = rent_own_fig %>% animation_opts(
-  frame = 100, 
-  transition = 0, 
-  redraw = FALSE
-)
-rent_own_fig = rent_own_fig %>% animation_slider(
-  hide = T
-)
-rent_own_fig = rent_own_fig %>% animation_button(
-  x = 1, xanchor = "right", y = 0, yanchor = "bottom"
-)
-
-rent_own_fig
 
 ```
 
@@ -529,20 +469,62 @@ d_enrollment = mutate(d_enrollment, Black = as.numeric(Black),
                         Females = as.numeric(Females),
                         Non_Binary = as.numeric(Non_Binary))
                         
+```
+
+```{r, echo=FALSE, fig.height = 7, fig.width = 8}
+
+enroll_fig1 = plot_ly(data = d_enrollment, 
+                     x = ~district_name, 
+                     y = ~White, 
+                     type = 'scatter', 
+                     text = paste("District:", d_enrollment$district_name,
+                                  "<br>Enrollment:", d_enrollment$White),
+                     hoverinfo = 'text',
+                     mode = 'markers') %>%
+  layout(title = 'Enrollment of White Students by District',
+         plot_bgcolor='#e5ecf6',
+          xaxis = list(
+            title = FALSE,
+            zerolinecolor = '#ffff',
+            zerolinewidth = 2,
+            gridcolor = 'ffff',
+            showticklabels=FALSE),
+          yaxis = list(
+            title = FALSE,
+            zerolinecolor = '#ffff',
+            zerolinewidth = 2,
+            gridcolor = 'ffff'))
+
+enroll_fig1
+
 
 ```
 
 ```{r, echo=FALSE, fig.height = 7, fig.width = 8}
 
-plot1 = plot(d_enrollment$White)
-plot1
+enroll_fig2 = plot_ly(data = d_enrollment, 
+                     x = ~district_name, 
+                     y = ~Black, 
+                     type = 'scatter', 
+                     text = paste("District:", d_enrollment$district_name,
+                                  "<br>Enrollment:", d_enrollment$Black),
+                     hoverinfo = 'text',
+                     mode = 'markers') %>%
+  layout(title = 'Enrollment of Black Students by District',
+         plot_bgcolor='#e5ecf6',
+          xaxis = list(
+            title = FALSE,
+            zerolinecolor = '#ffff',
+            zerolinewidth = 2,
+            gridcolor = 'ffff',
+            showticklabels=FALSE),
+          yaxis = list(
+            title = FALSE,
+            zerolinecolor = '#ffff',
+            zerolinewidth = 2,
+            gridcolor = 'ffff'))
 
-```
-
-```{r, echo=FALSE, fig.height = 7, fig.width = 8}
-
-plot2 = plot(d_enrollment$Black)
-plot2  
+enroll_fig2
 
 ```
 
@@ -671,6 +653,8 @@ gradtrends_long$grad_rate = as.numeric(gradtrends_long$grad_rate)
 
 gradtrends_long$Year = as.character(gradtrends_long$Year)
 
+gradtrends_long = na.omit(gradtrends_long)
+
 #shiny app project
 
 
@@ -681,23 +665,23 @@ gradtrends_long$Year = as.character(gradtrends_long$Year)
 gradtrends_plot = gradtrends_long %>% 
   ggplot(mapping = aes(x = Year, y = grad_rate, color = race, na.rm = TRUE)) +
   geom_line(aes(group = race, fill = race)) +
-  labs(title = "MA High School Graduation Rate, 2006-2020", 
+  labs(title = "MA High School Graduation Rate, 2006 - 2020", 
        caption = "Source: MA DESE",
        x = "Date",
        y = "Graduation Rate",
-       color = "4-year Graduation Rates by Race"
+       color = "4-year Graduation Rates, by race"
        ) +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1),
         axis.text.y = element_text(vjust = 0.2, hjust= 0.5),
         plot.title = element_text(hjust = 0.5), 
         plot.caption = element_text(hjust = 0, face = "italic")) + 
-  scale_color_brewer(palette = "Accent") + 
+  scale_color_brewer(palette = "Set2") + 
   scale_y_continuous(labels = function(y) paste0(y, '%'))
 
 gradtrends_plot
 
-# ggplotly(gradtrends_plot) %>% 
+# ggplotly(gradtrends_plot) %>%
 #   layout(xaxis = list(
 #       rangeselector = list(
 #         buttons = list(
@@ -726,6 +710,50 @@ gradtrends_plot
 ```
 
 ```{r}
+
+accumulate_by = function(dat, var) {
+  var = lazyeval::f_eval(var, dat)
+  lvls = plotly:::getLevels(var)
+  dats = lapply(seq_along(lvls), function(x) {
+    cbind(dat[var %in% lvls[seq(0, x)], ], frame = lvls[[x]])
+  })
+  dplyr::bind_rows(dats)
+}
+
+gt = gradtrends_long 
+gt_fig = gt %>%
+  filter(gt$Year >= 2006)
+gt_fig = gt_fig %>% accumulate_by(~Year)
+
+
+gt_fig = gt_fig %>%
+  plot_ly(
+    x = ~Year, 
+    y = ~grad_rate,
+    color = ~race,
+    frame = ~frame, 
+    colors = "Set2",
+    type = 'scatter',
+    mode = 'lines', 
+    line = list(simplyfy = F)) %>% layout(
+  xaxis = list(
+    title = "Date",
+    zeroline = F),
+  yaxis = list(
+    title = "Median",
+    zeroline = F)) %>% animation_opts(
+  frame = 100, 
+  transition = 0, 
+  redraw = TRUE) %>% animation_slider(
+  hide = T) %>% animation_button(
+  x = 1, xanchor = "right", y = 0, yanchor = "bottom")
+
+gt_fig
+
+
+```
+
+```{r}
  
 plymouth_income <- get_acs(
   geography = "tract",
@@ -733,7 +761,7 @@ plymouth_income <- get_acs(
   state = "MA",
   county = "Plymouth",
   geometry = TRUE,
-  year = 2021)
+  year = 2022)
  
 ```
 
@@ -753,7 +781,7 @@ tm_shape(plymouth_tiles) +
   tm_shape(plymouth_income) + 
   tm_polygons(col = "estimate",  
               alpha = 0.5, palette = "cividis", 
-              title = "Median household income\n2021 ACS") + 
+              title = "Median household income\n2022 ACS") + 
   tm_layout(legend.outside = TRUE) + 
   tm_credits("Basemap © Mapbox, © OpenStreetMap", position = c("RIGHT", "BOTTOM"))
 
@@ -767,7 +795,7 @@ norfolk_income <- get_acs(
   state = "MA",
   county = "Norfolk",
   geometry = TRUE,
-  year = 2021)
+  year = 2022)
 
 ```
 
@@ -785,7 +813,7 @@ tm_shape(norfolk_tiles) +
   tm_shape(norfolk_income) + 
   tm_polygons(col = "estimate",  
               alpha = 0.5, palette = "cividis", 
-              title = "Median household income\n2021 ACS") + 
+              title = "Median household income\n2022 ACS") + 
   tm_layout(legend.outside = TRUE) + 
   tm_credits("Basemap © Mapbox, © OpenStreetMap", position = c("RIGHT", "BOTTOM"))
 
