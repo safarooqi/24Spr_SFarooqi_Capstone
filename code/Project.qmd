@@ -464,7 +464,7 @@ h_acs_wide = get_acs(
 rent_bar_plot = h_acs_wide %>% 
   mutate(NAME = str_remove(NAME, "County, Massachusetts")) %>% 
   ggplot(aes(y = reorder(NAME, renterE), x = renterE)) +
-  geom_col() +  
+  geom_col(alpha = 0.5, width = 0.85) +  
   theme_minimal() + 
   labs(title = "Average Income for Renters by MA County", 
        subtitle = "2022 1-year ACS estimates", 
