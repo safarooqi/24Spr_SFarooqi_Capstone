@@ -35,8 +35,8 @@ census_api_key("c9264540e1e33a3c55dacba891cde5dd6a5ebb5e", overwrite = TRUE)
 
 tmap_mode("view")
 
-#v = load_variables(2022, "acs1", cache = TRUE)
-#View(v)
+v = load_variables(2022, "acs1", cache = TRUE)
+View(v)
 
 #B05010_002 - total ratio for income to poverty level, children under 18
 #B05010_003 - two parents
@@ -52,52 +52,6 @@ tmap_mode("view")
 
 ```{r}
 
-# ma_race_md <- get_acs(
-#   geography = "county",
-#   variables = c(
-#     "White" = "B03002_003",
-#     "Black" = "B03002_004",
-#     "Native" = "B03002_005",
-#     "Asian" = "B03002_006",
-#     "Pacific_Islander" = "B03002_007",
-#     "Other_Race" = "B03002_008",
-#     "Two_or_More_Races" = "B03002_009"
-#   ),
-#   state = "MA",
-#   geometry = TRUE,
-#   resolution = "20m",
-#    output = "wide"
-# )
-# 
-# ma_race_md = ma_race_md %>%
-#   rename("Black" = "BlackE",
-#          "White" = "WhiteE")
-# 
-# ma_race_md = ma_race_md %>%
-#  pivot_longer(c('Black', 'White'),
-#               names_to = 'Race',
-#               values_to = 'Population')
-# 
-# map1 = tm_shape(ma_race_md, projection="+proj=eck4") + 
-#   tm_polygons("Population",
-#               n = 6,
-#               id = "NAME",
-#               palette = "Blues",
-#               title = "ACS Estimate",
-#               legend.hist = TRUE,
-#               alpha = 0.7, 
-#               breaks = c(0, 40000, 120000, 200000, 350000, 600000, 1000000, 1500000)) + 
-#   tm_borders(lwd = .50, 
-#              col = "black",
-#              alpha = 1) +
-#   tm_layout(inner.margins=c(0,0,.1,0), 
-#             title.size=.8,
-#             title = "Population by Race in MA",
-#             frame = TRUE,
-#             legend.outside = TRUE,
-#             legend.hist.width = 5,
-#             fontfamily = "Helvetica")
-
 ma_race_md <- get_acs(
   geography = "county",
   variables = c(
@@ -112,31 +66,139 @@ ma_race_md <- get_acs(
   state = "MA",
   geometry = TRUE,
   resolution = "20m",
-  output = "wide"
+   output = "wide"
 )
 
-ma_race_md <- ma_race_md %>%
+ma_race_md = ma_race_md %>%
   rename("Black" = "BlackE",
          "White" = "WhiteE",
          "Asian" = "AsianE")
 
-map1 <- tm_shape(ma_race_md, projection = "+proj=eck4") + 
-  tm_fill("Population",
-          palette = "Blues",
-          style = "quantile",
-          breaks = c(0, 40000, 120000, 200000, 350000, 600000, 1000000, 1500000),
-          title = "ACS Population Estimate") + 
-  tm_facets(by = "Race") +  
-  tm_borders(lwd = 0.5, col = "black") +
-  tm_layout(inner.margins = c(0, 0, 0.1, 0), 
-            title.size = 0.8,
+ma_race_md = ma_race_md %>%
+ pivot_longer(c('Black', 'White', 'Asian'),
+              names_to = 'Race',
+              values_to = 'Population')
+
+map_race = tm_shape(ma_race_md, projection="+proj=eck4") +
+  tm_polygons(n = 6,
+              id = "NAME",
+              col = "black",
+              fill = "Race", 
+              palette = c("red", "blue", "green"),
+              title = "ACS Estimate",
+              legend.hist = TRUE,
+              alpha = 0.7,
+              breaks = c(0, 40000, 120000, 200000, 350000, 600000, 1000000, 1500000)) +
+  tm_borders(lwd = .50,
+             col = "black",
+             alpha = 1) +
+  tm_layout(inner.margins=c(0,0,.1,0),
+            title.size=.8,
             title = "Population by Race in MA",
             frame = TRUE,
             legend.outside = TRUE,
             legend.hist.width = 5,
             fontfamily = "Helvetica")
 
-tmap_leaflet(map1)
+
+map_race
+
+```
+
+```{r}
+
+
+my_variables1 = c(
+  White = "B03002_003"
+  )
+
+d_acs = get_acs(
+  geography = "county",
+  variables = my_variables1, 
+  state = "MA",
+  year = 2022,
+  survey = "acs1",
+  geometry = TRUE,
+  resolution = "20m")
+
+d_acs$NAME <- gsub(" County, Massachusetts", "", d_acs$NAME)
+
+map1 = tm_shape(d_acs, projection="+proj=eck4") + 
+  tm_polygons("estimate",
+              n = 6,
+              id = "NAME",
+              palette = "Blues",
+              title = "ACS Estimate, 2022",
+              legend.hist = TRUE,
+              alpha = 0.7, 
+              breaks = c(0, 40000, 120000, 200000, 350000, 600000, 1000000, 1500000)) + 
+  tm_borders(lwd = .50, 
+             col = "black",
+             alpha = 1) +
+  tm_layout(inner.margins=c(0,0,.1,0), 
+            title.size=.8,
+            title = "MA Population, White Alone",
+            frame = TRUE,
+            legend.outside = TRUE,
+            legend.hist.width = 5,
+            fontfamily = "Helvetica") 
+#+ tm_text("NAME", size = 0.5, root = 2, col = "black")
+
+```
+
+```{r}
+
+map1 + tm_view(set.view = c(-71.5, 42.3, 7.5))
+
+```
+
+
+```{r}
+
+my_variables2 = c(
+  Black = "B03002_004", 
+  Hispanic = "B03002_012",
+  Asian = "B03002_006"
+  )
+
+d_acs = get_acs(
+  geography = "county",
+  variables = my_variables2, 
+  state = "MA",
+  year = 2022,
+  survey = "acs1",
+  geometry = TRUE,
+  resolution = "20m")
+
+d_acs$NAME <- gsub(" County, Massachusetts", "", d_acs$NAME)
+
+map2 = tm_shape(d_acs, projection="+proj=eck4") + 
+  tm_polygons("estimate",
+              n = 6,
+              id = "NAME",
+              palette = "Blues",
+              title = "ACS Estimate, 2022",
+              legend.hist = TRUE,
+              alpha = 0.7, 
+              breaks = c(0, 40000, 120000, 200000, 350000, 600000, 1000000, 1500000)) + 
+  tm_borders(lwd = .50, 
+             col = "black",
+             alpha = 1) +
+  tm_layout(inner.margins=c(0,0,.1,0), 
+            title.size=.8,
+            title = "MA Population, Nonwhite",
+            frame = TRUE,
+            legend.outside = TRUE,
+            legend.hist.width = 5,
+            fontfamily = "Helvetica")
+#+ tm_text("NAME", size = 0.5, root = 2, col = "black")
+
+
+```
+
+```{r}
+
+map2 + tm_view(set.view = c(-71.5, 42.3, 7.5))
 
 ```
 
@@ -163,25 +225,30 @@ tmap_mode("view")
 # B17010I_004 = Poverty Status in the Past 12 Months Married-couple family With related children under 18                  years (hispanic)
 
 
-my_variables2 = c(
+my_variables3 = c(
   Asian = "B03002_006"
   )
 
 d_acs = get_acs(
   geography = "county",
-  variables = my_variables2, 
+  variables = my_variables3, 
   state = "MA",
   year = 2022,
   survey = "acs1",
   geometry = TRUE,
   resolution = "20m")
 
+d_acs$NAME <- gsub(" County, Massachusetts", "", d_acs$NAME)
+
+specific_county <- "Barnstable"
+barnstable_data <- d_acs[d_acs$NAME == specific_county, ]
+
 map3 = tm_shape(d_acs, projection="+proj=eck4") + 
   tm_polygons("estimate",
               n = 6,
               id = "NAME",
               palette = "Blues",
-              title = "ACS Estimate",
+              title = "ACS Estimate, 2022",
               legend.hist = TRUE,
               alpha = 0.7, 
               breaks = c(0, 40000, 120000, 200000, 350000, 600000, 1000000, 1500000)) + 
@@ -190,17 +257,22 @@ map3 = tm_shape(d_acs, projection="+proj=eck4") +
              alpha = 1) +
   tm_layout(inner.margins=c(0,0,.1,0), 
             title.size=.8,
-            title = "Population by Race in MA",
+            title = "MA Population, Asian Alone",
             frame = TRUE,
             legend.outside = TRUE,
             legend.hist.width = 5,
             fontfamily = "Helvetica") 
+#+ tm_text("NAME", size = 0.6, root = 1, col = "black") 
+
+map3
+
 
 ```
 
 ```{r, fig.height=7, fig.width=10, fig.align="center", echo=FALSE, message=FALSE, warning=FALSE}
 
 map3 + tm_view(set.view = c(-71.5, 42.3, 7.5))
+
 ```
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE, include = FALSE}
@@ -289,8 +361,8 @@ map5 = tm_shape(d_acs, projection="+proj=eck4") +
   tm_polygons("estimate",
               n = 6,
               id = "NAME",
-              palette = "Blues",
-              title = "ACS Estimate",
+              palette = "Greens",
+              title = "ACS Estimate, 2022",
               legend.hist = TRUE,
               alpha = 0.7, 
               breaks = c(0, 40000, 120000, 200000, 350000, 600000, 1000000, 1500000)) + 
@@ -299,11 +371,13 @@ map5 = tm_shape(d_acs, projection="+proj=eck4") +
              alpha = 1) +
   tm_layout(inner.margins=c(0,0,.1,0), 
             title.size=.8,
-            title = "Household Income of White families in MA",
+            title = "Average Household Income of White families in MA",
             frame = TRUE,
             legend.outside = TRUE,
             legend.hist.width = 5,
             fontfamily = "Helvetica") 
+
+#tmap_save(map5, "Income_White_families.png")
 
 ```
 
@@ -316,9 +390,15 @@ map5 + tm_view(set.view = c(-71.5, 42.3, 7.5))
 
 ```{r}
 
+my_variables_income = c(
+  Black = "B19001B_001", 
+  Hispanic = "B19001I_001",
+  Asian = "B19001D_001"
+  )
+
 d_acs = get_acs(
   geography = "county",
-  variables = 'B19001D_001', 
+  variables = my_variables_income, 
   state = "MA",
   year = 2022,
   survey = "acs1",
@@ -329,8 +409,8 @@ map9 = tm_shape(d_acs, projection="+proj=eck4") +
   tm_polygons("estimate",
               n = 6,
               id = "NAME",
-              palette = "Blues",
-              title = "ACS Estimate",
+              palette = "Greens",
+              title = "ACS Estimate, 2022",
               legend.hist = TRUE,
               alpha = 0.7, 
               breaks = c(0, 40000, 120000, 200000, 350000, 600000, 1000000, 1500000)) + 
@@ -339,7 +419,7 @@ map9 = tm_shape(d_acs, projection="+proj=eck4") +
              alpha = 1) +
   tm_layout(inner.margins=c(0,0,.1,0), 
             title.size=.8,
-            title = "Household Income of Asian families in MA",
+            title = "Average Household Income of Nonwhite families in MA",
             frame = TRUE,
             legend.outside = TRUE,
             legend.hist.width = 5,
@@ -373,7 +453,7 @@ income_black = "B19001B_001"
 
 d_acs = get_acs(
   geography = "county",
-  variables = income_black, 
+  variables = "B19001D_001", 
   state = "MA",
   year = 2022,
   survey = "acs1",
@@ -384,21 +464,24 @@ map6 = tm_shape(d_acs, projection="+proj=eck4") +
   tm_polygons("estimate",
               n = 6,
               id = "NAME",
-              palette = "Blues",
-              title = "ACS Estimate",
+              palette = "Greens",
+              title = "ACS Estimate, 2022",
               legend.hist = TRUE,
               alpha = 0.7, 
-              breaks = c(0, 40000, 120000, 200000, 350000, 600000, 1000000, 1500000)) + 
+              breaks = c(0, 40000, 120000, 200000, 350000, 600000, 1000000, 1500000),
+              popup.vars = c("estimate")) + 
   tm_borders(lwd = .50, 
              col = "black",
              alpha = 1) +
   tm_layout(inner.margins=c(0,0,.1,0), 
             title.size=.8,
-            title = "Household Income of Black families in MA",
+            title = "Average Household Income of Asian families in MA",
             frame = TRUE,
             legend.outside = TRUE,
             legend.hist.width = 5,
             fontfamily = "Helvetica") 
+
+#leaflet_map <- tmap_leaflet(map6)
 
 ```
 
@@ -424,10 +507,12 @@ map6 + tm_view(set.view = c(-71.5, 42.3, 7.5))
 
 ```{r}
 
+#Estimate!!Total:!!Income in the past 12 months at or above poverty level:!!Married-couple family:!!Bachelor's degree or higher
+
 h_acs_wide <- get_acs(
   geography = "county",
-  variables = c(renter = "B17019_005", 
-                owner = "B17019_004"), 
+  variables = c(renter = "B17018_024", 
+                owner = "B17018_022"), 
   state = "MA",
   year = 2022,
   survey = "acs1",
@@ -442,21 +527,23 @@ h_acs_wide <- h_acs_wide %>%
 
 rent_bar_plot <- h_acs_wide %>% 
   ggplot(aes(x = reorder(County, renterE), y = renterE)) +
-  geom_col(fill = "skyblue", alpha = 0.8, width = 0.7) +  
-  theme_minimal() + 
-  labs(title = "Average Annual Income of Renters by MA County", 
-       subtitle = "By families below the poverty level", 
+  geom_col(alpha = 0.8, width = 0.7) +  
+  theme_wsj() + 
+  labs(title = "Income of MA Families by Educational Attaintment", 
+       subtitle = "Bachelor's Degree or higher", 
        y = "Average Income",  
-       x = "")   
+       x = "",
+       caption = "Source: 2022 ACS")   
 
 
 rent_bar_plot <- rent_bar_plot +
   theme(
     plot.title = element_text(size = 14),  
     plot.subtitle = element_text(size = 12),  
-    axis.text = element_text(size = 8), 
+    axis.text = element_text(size = 7), 
     panel.grid.major.x = element_blank(),  
-    panel.grid.minor.x = element_blank() 
+    panel.grid.minor.x = element_blank(),
+    plot.caption = element_text(size = 6, face = "italic") 
   )
 
 print(rent_bar_plot)
@@ -468,7 +555,7 @@ print(rent_bar_plot)
 h_acs_wide <- get_acs(
   geography = "county",
   variables = c(renter = "B17019_005", 
-                owner = "B17019_004"), 
+                owner = "B17018_022"), 
   state = "MA",
   year = 2022,
   survey = "acs1",
@@ -483,21 +570,23 @@ h_acs_wide <- h_acs_wide %>%
 
 owner_bar_plot <- h_acs_wide %>% 
   ggplot(aes(x = reorder(County, ownerE), y = ownerE)) +
-  geom_col(fill = "skyblue", alpha = 0.8, width = 0.7) +  
-  theme_minimal() + 
-  labs(title = "Average Annual Income for Homeowners in MA", 
-       subtitle = "Families below the poverty level, by county", 
+  geom_col(alpha = 0.8, width = 0.7) +  
+  theme_wsj() + 
+  labs(title = "Income of MA Families by Educational Attaintment", 
+       subtitle = "High-School, or equivalent", 
        y = "Average Income",  
-       x = "")   
+       x = "",
+       caption = "Source: 2022 ACS")   
 
 
 owner_bar_plot <- owner_bar_plot +
   theme(
     plot.title = element_text(size = 14),  
     plot.subtitle = element_text(size = 12),  
-    axis.text = element_text(size = 8), 
+    axis.text = element_text(size = 7), 
     panel.grid.major.x = element_blank(),  
-    panel.grid.minor.x = element_blank() 
+    panel.grid.minor.x = element_blank(),
+    plot.caption = element_text(size = 6, face = "italic") 
   )
 
 print(owner_bar_plot)
@@ -537,6 +626,13 @@ d_enrollment = d_enrollment %>% mutate(d_enrollment, district_name = str_remove_
 
 d_enrollment = d_enrollment %>% mutate(d_enrollment, district_name = str_remove_all(district_name, "[()]"))
 
+mapping_table <- data.frame(
+  district = c("Lexington", "Wellesley", "Dover-Sherborn", "Needham", "Northboro-Southboro", "Hopkinton", "Winchester", "Groton-Dunstable", "Acton-Boxborough", "Westborough"),
+  county = c("Middlesex", "Norfolk", "Norfolk, Middlesex", "Norfolk", "Worcester", "Middlesex", "Middlesex", "Middlesex", "Middlesex", "Worcester")
+)
+
+d_enrollment$county <- mapping_table$county[match(d_enrollment$district_name, mapping_table$district)]
+
 d_enrollment
                         
 ```
@@ -550,15 +646,16 @@ enroll_fig1 = plot_ly(data = d_enrollment,
                      text = paste("District:", d_enrollment$district_name,
                                   "<br>Enrollment:", d_enrollment$White,"%"),
                      hoverinfo = 'text',
-                     mode = 'markers'
+                     mode = 'markers',
+                     marker = list(color = '#70569C')
                      ) %>%
   layout(title = 'Enrollment of White Students by District',
-         plot_bgcolor='#e5ecf6',
+         plot_bgcolor='#F4EEFE',
          margin = list(
                 b = 50,
                 t = 50),
           xaxis = list(
-            title = 'District Names',
+            title = 'Districts',
             zerolinecolor = '#ffff',
             zerolinewidth = 2,
             gridcolor = 'ffff',
@@ -583,14 +680,15 @@ enroll_fig2 = plot_ly(data = d_enrollment,
                      text = paste("District:", d_enrollment$district_name,
                                   "<br>Enrollment:", d_enrollment$Black,"%"),
                      hoverinfo = 'text',
-                     mode = 'markers') %>%
+                     mode = 'markers',
+                     marker = list(color = '#70569C')) %>%
   layout(title = 'Enrollment of Black Students by District',
-         plot_bgcolor='#e5ecf6',
+         plot_bgcolor='#F4EEFE',
          margin = list(
                 b = 50,
                 t = 50),
           xaxis = list(
-            title = 'District Names',
+            title = 'Districts',
             zerolinecolor = '#ffff',
             zerolinewidth = 2,
             gridcolor = 'ffff',
@@ -599,28 +697,30 @@ enroll_fig2 = plot_ly(data = d_enrollment,
             title = 'Percentage Enrollment',
             zerolinecolor = '#ffff',
             zerolinewidth = 2,
-            gridcolor = 'ffff'))
+            gridcolor = 'ffff',
+            range = c(0, 100)))
 
 enroll_fig2
 
 ```
 ```{r}
 
-enroll_fig2 = plot_ly(data = d_enrollment, 
+enroll_fig3 = plot_ly(data = d_enrollment, 
                      x = ~district_name, 
                      y = ~Asian, 
                      type = 'scatter', 
                      text = paste("District:", d_enrollment$district_name,
                                   "<br>Enrollment:", d_enrollment$Asian,"%"),
                      hoverinfo = 'text',
-                     mode = 'markers') %>%
+                     mode = 'markers',
+                     marker = list(color = '#70569C')) %>%
   layout(title = 'Enrollment of Asian Students by District',
-         plot_bgcolor='#e5ecf6',
+         plot_bgcolor='#F4EEFE',
          margin = list(
                 b = 50,
                 t = 50),
           xaxis = list(
-            title = 'District Names',
+            title = 'Districts',
             zerolinecolor = '#ffff',
             zerolinewidth = 2,
             gridcolor = 'ffff',
@@ -629,9 +729,42 @@ enroll_fig2 = plot_ly(data = d_enrollment,
             title = 'Percentage Enrollment',
             zerolinecolor = '#ffff',
             zerolinewidth = 2,
-            gridcolor = 'ffff'))
+            gridcolor = 'ffff',
+            range = c(0, 100)))
 
-enroll_fig2
+enroll_fig3
+
+```
+```{r}
+
+enroll_fig4 = plot_ly(data = d_enrollment, 
+                     x = ~district_name, 
+                     y = ~Hispanic, 
+                     type = 'scatter', 
+                     text = paste("District:", d_enrollment$district_name,
+                                  "<br>Enrollment:", d_enrollment$Hispanic,"%"),
+                     hoverinfo = 'text',
+                     mode = 'markers',
+                     marker = list(color = '#70569C')) %>%
+  layout(title = 'Enrollment of Hispanic Students by District',
+         plot_bgcolor='#F4EEFE',
+         margin = list(
+                b = 50,
+                t = 50),
+          xaxis = list(
+            title = 'Districts',
+            zerolinecolor = '#ffff',
+            zerolinewidth = 2,
+            gridcolor = 'ffff',
+            showticklabels=FALSE),
+          yaxis = list(
+            title = 'Percentage Enrollment',
+            zerolinecolor = '#ffff',
+            zerolinewidth = 2,
+            gridcolor = 'ffff',
+            range = c(0, 100)))
+
+enroll_fig4
 
 ```
 
@@ -645,6 +778,7 @@ ma_race_data <- get_acs(
     "Black" = "B03002_004",
     "Native" = "B03002_005",
     "Asian" = "B03002_006",
+    "Hispanic" = "B03002_012",
     "Pacific_Islander" = "B03002_007",
     "Other_Race" = "B03002_008",
     "Two_or_More_Races" = "B03002_009"
@@ -657,10 +791,11 @@ ma_race_data <- get_acs(
 ma_race_data = ma_race_data %>%
   rename("Black" = "BlackE",
          "White" = "WhiteE",
-         "Asian" = "AsianE")
+         "Asian" = "AsianE",
+         "Hispanic" = "HispanicE")
 
 ma_race_data = ma_race_data %>%
- pivot_longer(c('Black', 'White', 'Asian'),
+ pivot_longer(c('Black', 'White', 'Asian', 'Hispanic'),
               names_to = 'Race',
               values_to = 'Population')
 
@@ -670,7 +805,7 @@ ma_race_plot <- ma_race_data %>%
   ggplot(aes(x = reorder(NAME, Population), y = Population, fill = Race)) +
   geom_col(position = "stack", width = 0.7) +
   scale_fill_brewer(palette = "Set2") +  
-  theme_minimal() +
+  theme_gdocs() +
   labs(
     title = "Population by Race in MA Counties",
     x = "County",
@@ -680,7 +815,8 @@ ma_race_plot <- ma_race_data %>%
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1),
     axis.text = element_text(size = 6), 
-  )
+  ) +
+  scale_y_continuous(labels = scales::comma)
 
 ma_race_plot
 
@@ -705,33 +841,102 @@ kable(dwt, format = "html") %>%
 
 ```{r}
 
-selected_columns <- c("district_name", "White", "Black", "Asian")
+enrollment_columns <- c("county", "district_name", "White", "Black", "Asian", "Hispanic")
 
-# Filter the data by a specific district (if needed)
-specific_district <- c("Lexington", "Acton-Boxborough", "Harvard", "Dover-Sherborn", "Weston", "Brookline", "Hamilton-Wenham", "Hingham")
+specific_districts <- c("Lexington", "Wellesley", "Dover-Sherborn", "Needham", "Northboro-Southboro", "Hopkinton", "Winchester", "Groton-Dunstable", "Acton-Boxborough", "Westborough")
 filtered_district <- d_enrollment %>%
-  filter(district_name %in% specific_district)
+  filter(district_name %in% specific_districts)
 
-# Now, select the specified columns and display the table
-selected_table <- filtered_district %>%
-  select(all_of(selected_columns))
+enrollment_table <- filtered_district %>%
+  select(all_of(enrollment_columns))
 
-specific_district <- "Lexington"
+enrollment_table$district_name <- factor(enrollment_table$district_name, levels = specific_districts)
 
-filtered_district <- d_enrollment %>%
-  filter(district_name == specific_district)
+enrollment_table <- enrollment_table[order(enrollment_table$district_name), ]
 
-# Now you can use the `kable` function to display the top 10 most populated districts
-kable(selected_table, format = "html") %>%
+enrollment_table$Asian <- paste0(enrollment_table$Asian, "%")
+enrollment_table$Black <- paste0(enrollment_table$Black, "%")
+enrollment_table$Hispanic <- paste0(enrollment_table$Hispanic, "%")
+enrollment_table$White <- paste0(enrollment_table$White, "%")
+
+kable(enrollment_table, col.names = c("County", "District", "Asian", "Black", "Hispanic", "White"), format = "html") %>%
   kable_styling(position = "center", full_width = FALSE) %>%
-  add_header_above(c("Student Population by Race and District" = length(selected_columns)))  %>%  
-  row_spec(0, bold = TRUE, color = "white", background = "#0073e6") %>%  
-  column_spec(1:length(selected_columns), width = "10em") 
+  add_header_above(c("Student Population by Race and District" = length(enrollment_columns)))  %>%  
+  row_spec(0, bold = TRUE, color = "white", background = "#584A4A") %>%  
+  column_spec(1:length(enrollment_columns), width = "10em") 
 
 ```
 
 ```{r, echo=FALSE, fig.height = 7, fig.width = 8}
 
+mcas = read_excel("NextGenMCAS.xlsx")
+
+colnames(mcas) = as.character(mcas[1,])
+
+mcas = mcas[-1,]
+
+mcas = mcas %>%
+  rename("meets_exceeds" = "M+E %",
+         "not_meets" = "NM %", 
+         "district" = "District Name")
+
+mcas$meets_exceeds = as.numeric(mcas$meets_exceeds)
+mcas$not_meets = as.numeric(mcas$not_meets)
+
+mcas_wide_me <- pivot_wider(mcas, id_cols = district, names_from = "Subject", values_from = "meets_exceeds")
+mcas_wide_nm <- pivot_wider(mcas, id_cols = district, names_from = "Subject", values_from = "not_meets")
+
+mapping_table <- data.frame(
+  district = c("Lexington", "Wellesley", "Dover-Sherborn", "Needham", "Northboro-Southboro", "Hopkinton", "Winchester", "Groton-Dunstable", "Acton-Boxborough", "Westborough"),
+  county = c("Middlesex", "Norfolk", "Norfolk, Middlesex", "Norfolk", "Worcester", "Middlesex", "Middlesex", "Middlesex", "Middlesex", "Worcester")
+)
+
+mcas_wide_me$county <- mapping_table$county[match(mcas_wide_me$district, mapping_table$district)]
+
+```
+
+```{r}
+
+mcas_columns <- c("County" = "county", "District" = "district", "Math" = "MATH") 
+#top 10, discludes charters
+mcas_districts <- c("Lexington", "Wellesley", "Dover-Sherborn", "Needham", "Northboro-Southboro", "Hopkinton", "Winchester", "Groton-Dunstable", "Acton-Boxborough", "Westborough")
+filtered_mcas_district <- mcas_wide_me %>%
+  filter(district %in% mcas_districts) 
+
+mcas_table <- filtered_mcas_district %>%
+  select(all_of(mcas_columns)) %>% 
+  arrange(desc(Math))
+
+
+kable(mcas_table, format = "html") %>%
+  kable_styling(position = "center", full_width = FALSE) %>%
+  add_header_above(c("Top 10 MCAS Scores by Subject" = length(mcas_columns)))  %>%  
+  row_spec(0, bold = TRUE, color = "white", background = "#584A4A") %>%  
+  column_spec(1:length(mcas_columns), width = "10em") 
+
+```
+
+
+```{r}
+
+mcas_columns <- c("district", "meets_exceeds", "not_meets")
+
+specific_districts <- c("Lexington", "Acton-Boxborough", "Harvard", "Dover-Sherborn", "Weston", "Brookline", "Hamilton-Wenham", "Hingham")
+filtered_district <- d_enrollment %>%
+  filter(district_name %in% specific_districts)
+
+enrollment_table <- filtered_district %>%
+  select(all_of(enrollment_columns))
+
+kable(enrollment_table, format = "html") %>%
+  kable_styling(position = "center", full_width = FALSE) %>%
+  add_header_above(c("Student Population by Race and District" = length(enrollment_columns)))  %>%  
+  row_spec(0, bold = TRUE, color = "white", background = "#0073e6") %>%  
+  column_spec(1:length(enrollment_columns), width = "10em") 
+
+```
+
+```{r, echo=FALSE, fig.height = 7, fig.width = 8}
 #descriptive statistics
 
 table1::label(d_enrollment$Black) = "Avg # of Black Students in MA School Districts"
@@ -744,12 +949,26 @@ kable(dbt, format = "html") %>%
   column_spec(1:2, width = "10em") 
 
 ```
+
+
 ```{r}
 
 table1::label(d_enrollment$Asian) = "Avg # of Asian Students in MA School Districts"
 dat = table1::table1(~Asian, data = d_enrollment)
 
 kable(dat, format = "html") %>%
+  kable_styling(position = "center", full_width = FALSE) %>%
+  add_header_above(c("Student Population by Race" = 2))  %>%  
+  row_spec(0, bold = TRUE, color = "white") %>%  
+  column_spec(1:2, width = "10em") 
+
+```
+```{r}
+
+table1::label(d_enrollment$Hispanic) = "Avg # of Hispanic Students in MA School Districts"
+dht = table1::table1(~Hispanic, data = d_enrollment)
+
+kable(dht, format = "html") %>%
   kable_styling(position = "center", full_width = FALSE) %>%
   add_header_above(c("Student Population by Race" = 2))  %>%  
   row_spec(0, bold = TRUE, color = "white") %>%  
@@ -799,28 +1018,26 @@ bt = table1::table1(~estimate, data = b)
 
 kable(bt, format = "html") %>%
   kable_styling(position = "center", full_width = FALSE) %>%
-  add_header_above(c("Average Household Income by Race" = 2))  %>%  
-  row_spec(0, bold = TRUE, color = "white") %>%  
-  column_spec(1:2, width = "10em") 
+  add_header_above(c("Average Household Income by Race" = 2))  %>%
+  row_spec(0, bold = TRUE, color = "white") %>%
+  column_spec(1:2, width = "10em")
 
 
 ```
+```{r}
 
-```{r, echo=FALSE, fig.height = 7, fig.width = 8}
-
-income_white = "B19001A_001"
-income_black = "B19001B_001" 
+#Hispanic = "B19001I_001"
 
 w = get_acs(
   geography = "county",
-  variables = "B19001A_001", 
+  variables = "B19001I_001", 
   state = "MA",
   year = 2022,
   survey = "acs1",
   geometry = TRUE,
   resolution = "20m")
 
-table1::label(w$estimate) = "White Household Income, 2022"
+table1::label(w$estimate) = "Hispanic Household Income, 2022"
 wt = table1::table1(~estimate, data = w)
 
 kable(wt, format = "html") %>%
@@ -831,7 +1048,7 @@ kable(wt, format = "html") %>%
 
 ```
 
-```{r}
+```{r, echo=FALSE, fig.height = 7, fig.width = 8}
 
 income_white = "B19001A_001"
 income_black = "B19001B_001" 
@@ -894,12 +1111,12 @@ gradtrends = gradtrends %>% add_row(Group = 'Year',
                                     .before=1)
 
 
- gradtrends_long = gradtrends %>% 
+gradtrends_long = gradtrends %>% 
    rotate_df()
  
- colnames(gradtrends_long) = as.character(gradtrends_long[1,])
+colnames(gradtrends_long) = as.character(gradtrends_long[1,])
  
-  gradtrends_long = gradtrends_long[-1,]
+gradtrends_long = gradtrends_long[-1,]
  
 gradtrends_long = gradtrends_long %>%
   rename("Black" = "African-American")
@@ -925,15 +1142,15 @@ gradtrends_long = na.omit(gradtrends_long)
 gradtrends_plot = gradtrends_long %>% 
   ggplot(mapping = aes(x = Year, y = grad_rate, color = race, na.rm = TRUE)) +
   geom_line(aes(group = race, fill = race)) +
-  labs(title = "MA High School Graduation Rate, 2006 - 2020", 
+  labs(title = "MA High School Graduation Trends, 2006 - 2021", 
        caption = "Source: MA DESE",
-       x = "Date",
+       x = "Year",
        y = "Graduation Rate",
-       color = "4-year Graduation Rates, by race"
+       color = "4-Year Graduation Rates, by Race"
        ) +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, vjust = 0.5, hjust=1),
-        axis.text.y = element_text(vjust = 2, hjust= 0.5),
+  theme(axis.text.x = element_text(angle = 45, vjust = 1.5, hjust=1),
+        axis.text.y = element_text(vjust = 4, hjust= 1),
         plot.title = element_text(hjust = 1), 
         plot.caption = element_text(hjust = 0, face = "italic")) + 
   scale_color_brewer(palette = "Set2") + 
@@ -1028,11 +1245,11 @@ gt_fig
 
 ```{r}
 
-plymouth_income <- get_acs(
+suffolk_income <- get_acs(
   geography = "tract",
   variables = "B19013_001",
   state = "MA",
-  county = "Plymouth",
+  county = "Suffolk",
   geometry = TRUE,
   year = 2022)
 
@@ -1043,16 +1260,24 @@ plymouth_income <- get_acs(
 mb_access_token("sk.eyJ1Ijoic2FtaWhhZiIsImEiOiJjbHU3Zno0YWYwNjFkMmpuMGR0emlodjJiIn0.OsHYgeCC11tk09PVtKbtBg", overwrite=TRUE, install = TRUE)
 
 
-plymouth_tiles <- get_static_tiles(
-  location = plymouth_income,
+suffolk_income <- get_acs(
+  geography = "tract",
+  variables = "B19013_001",
+  state = "MA",
+  county = "Suffolk",
+  geometry = TRUE,
+  year = 2022)
+
+suffolk_tiles <- get_static_tiles(
+  location = suffolk_income,
   zoom = 9,
   style_id = "light-v9",
   username = "mapbox",
   access_token = "sk.eyJ1Ijoic2FtaWhhZiIsImEiOiJjbHU3Zno0YWYwNjFkMmpuMGR0emlodjJiIn0.OsHYgeCC11tk09PVtKbtBg")
 
-tm_shape(plymouth_tiles) + 
+tm_shape(suffolk_tiles) + 
   tm_rgb() + 
-  tm_shape(plymouth_income) + 
+  tm_shape(suffolk_income) + 
   tm_polygons(col = "estimate",  
               alpha = 0.5, palette = "cividis", 
               title = "Median household income\n2022 ACS") + 
@@ -1095,27 +1320,27 @@ tm_shape(norfolk_tiles) +
 
 ```{r}
 
-middlesex_income <- get_acs(
+ma_income <- get_acs(
   geography = "tract",
   variables = "B19013_001",
   state = "MA",
-  county = "Middlesex",
   geometry = TRUE,
   year = 2022)
 
-middlesex_tiles <- get_static_tiles(
-  location = middlesex_income,
+ma_tiles <- get_static_tiles(
+  location = ma_income,
   zoom = 9,
   style_id = "light-v9",
   username = "mapbox",
   access_token = "sk.eyJ1Ijoic2FtaWhhZiIsImEiOiJjbHU3Zno0YWYwNjFkMmpuMGR0emlodjJiIn0.OsHYgeCC11tk09PVtKbtBg")
 
-tm_shape(middlesex_tiles) + 
+tm_shape(ma_tiles) + 
   tm_rgb() + 
-  tm_shape(middlesex_income) + 
+  tm_shape(ma_income) + 
   tm_polygons(col = "estimate",  
               alpha = 0.5, palette = "cividis", 
-              title = "Median household income") + 
+              title = "Median household income",
+              subtitle = "Middlesex County") + 
   tm_layout(legend.outside = TRUE) + 
   tm_credits("Basemap © Mapbox, © OpenStreetMap", position = c("RIGHT", "BOTTOM"))
 
