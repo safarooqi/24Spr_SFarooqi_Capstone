@@ -301,6 +301,9 @@ d_acs = get_acs(
   geometry = TRUE,
   resolution = "20m")
 
+d_acs$NAME <- gsub(" County, Massachusetts", "", d_acs$NAME)
+
+
 map4 = tm_shape(d_acs, projection="+proj=eck4") + 
   tm_polygons("estimate",
               n = 6,
@@ -357,6 +360,9 @@ d_acs = get_acs(
   geometry = TRUE,
   resolution = "20m")
 
+d_acs$NAME <- gsub(" County, Massachusetts", "", d_acs$NAME)
+
+
 map5 = tm_shape(d_acs, projection="+proj=eck4") + 
   tm_polygons("estimate",
               n = 6,
@@ -405,6 +411,8 @@ d_acs = get_acs(
   geometry = TRUE,
   resolution = "20m")
 
+d_acs$NAME <- gsub(" County, Massachusetts", "", d_acs$NAME)
+
 map9 = tm_shape(d_acs, projection="+proj=eck4") + 
   tm_polygons("estimate",
               n = 6,
@@ -424,6 +432,8 @@ map9 = tm_shape(d_acs, projection="+proj=eck4") +
             legend.outside = TRUE,
             legend.hist.width = 5,
             fontfamily = "Helvetica") 
+
+map9 + tm_view(set.view = c(-71.5, 42.3, 7.5))
 
 ```
 
@@ -511,8 +521,8 @@ map6 + tm_view(set.view = c(-71.5, 42.3, 7.5))
 
 h_acs_wide <- get_acs(
   geography = "county",
-  variables = c(renter = "B17018_024", 
-                owner = "B17018_022"), 
+  variables = c(college = "B17018_024", 
+                hs = "B17018_022"), 
   state = "MA",
   year = 2022,
   survey = "acs1",
@@ -525,8 +535,8 @@ h_acs_wide <- h_acs_wide %>%
   mutate(County = str_remove(NAME, " County, Massachusetts"))  
 
 
-rent_bar_plot <- h_acs_wide %>% 
-  ggplot(aes(x = reorder(County, renterE), y = renterE)) +
+college_bar_plot <- h_acs_wide %>% 
+  ggplot(aes(x = reorder(County, collegeE), y = collegeE)) +
   geom_col(alpha = 0.8, width = 0.7) +  
   theme_wsj() + 
   labs(title = "Income of MA Families by Educational Attaintment", 
@@ -536,7 +546,7 @@ rent_bar_plot <- h_acs_wide %>%
        caption = "Source: 2022 ACS")   
 
 
-rent_bar_plot <- rent_bar_plot +
+college_bar_plot <- college_bar_plot +
   theme(
     plot.title = element_text(size = 14),  
     plot.subtitle = element_text(size = 12),  
@@ -828,7 +838,7 @@ ma_race_plot
 top_10_populated <- d_enrollment %>%
   top_n(10, wt = d_enrollment$White)
 
-table1::label(d_enrollment$White) = "Avg # of White Students in MA School Districts"
+table1::label(d_enrollment$White) = "Avg Number of White Students in MA School Districts"
 dwt = table1::table1(~White, data = d_enrollment)
 
 kable(dwt, format = "html") %>%
@@ -978,9 +988,10 @@ kable(dht, format = "html") %>%
 
 ```{r, echo=FALSE, fig.height = 7, fig.width = 8}
 
-income_white = "B19001A_001"
-income_black = "B19001B_001" 
-income_asian = "B19001D_001"
+income_variables = c(income_white = "B19001A_001",
+                     income_black = "B19001B_001",
+                     income_asian = "B19001D_001",
+                     income_white = "B19001A_001")
 
 b = get_acs(
   geography = "county",
@@ -1069,7 +1080,7 @@ kable(wt, format = "html") %>%
   kable_styling(position = "center", full_width = FALSE) %>%
   add_header_above(c("Average Household Income by Race" = 2))  %>%  
   row_spec(0, bold = TRUE, color = "white") %>%  
-  column_spec(1:2, width = "10em") 
+  column_spec(1:1, width = "10em") 
 
 ```
 
