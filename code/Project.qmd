@@ -396,11 +396,12 @@ map5 + tm_view(set.view = c(-71.5, 42.3, 7.5))
 
 ```{r}
 
-my_variables_income = c(
+my_variables_income <- c(
   Black = "B19001B_001", 
   Hispanic = "B19001I_001",
-  Asian = "B19001D_001"
-  )
+  Asian = "B19001D_001",
+  White = "B19001A_001"
+)
 
 d_acs = get_acs(
   geography = "county",
@@ -1359,3 +1360,9 @@ tm_shape(ma_tiles) +
 
 
 ```
+
+
+
+
+
+

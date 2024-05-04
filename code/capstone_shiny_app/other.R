@@ -415,6 +415,7 @@ output$map <- renderLeaflet({
 })
 }
 
+
 shinyApp(ui = ui, server = server)
 
 

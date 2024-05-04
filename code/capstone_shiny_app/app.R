@@ -284,7 +284,7 @@ ui <- fluidPage(
   
   
   fluidRow(HTML("<center>
-                <h1>Inequity Visualized:<br>The MA Public Education System</h1>
+                <h1>Inequity Visualized:<br>Segregation in MA Public Schools</h1>
                 <p style='size:40px';> by Samiha Farooqi</a></p>
                 </center>")
   ),
@@ -320,7 +320,7 @@ ui <- fluidPage(
                       style = "padding: 20px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
                ),
                column(12, 
-                      style = "height: 20px;" 
+                      style = "height: 50px;" 
                ),
                column(12,
                       HTML("<h3 style='font-size: 20px;'>This table displays the districts with the top 10 best achievment scores from the state math exam (MCAS).</h3>
@@ -329,7 +329,7 @@ ui <- fluidPage(
                       style = "padding: 20px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
                ),
                column(12, 
-                      style = "height: 20px;"  
+                      style = "height: 50px;"  
                ),
                column(12,
                       plotlyOutput("college_bar_plot", height = "600px"),
@@ -340,20 +340,36 @@ ui <- fluidPage(
     tabPanel("Population Breakdown",
              fluidRow(
                column(12, 
-                      tabPanel("MA Counties by Race", 
-                               plotlyOutput("race_plot", height = "600px"),
-                               style = "padding: 20px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
-                      )
+                       plotlyOutput("race_plot", height = "600px"),
+                       style = "padding: 20px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
                ),
                column(12, 
-                      style = "height: 20px;" 
+                      style = "height: 50px;"
+                      )
+             ),
+              fluidRow(
+                column(6, #white
+                      plotlyOutput("enroll_plot1", height = "550px"),
+                      style = "padding: 20px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
+               ),
+               column(6, #black
+                      plotlyOutput("enroll_plot2", height = "550px"),
+                      style = "padding: 20px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
+               ),
+               column(6, #asian
+                      plotlyOutput("enroll_plot3", height = "550px"),
+                      style = "padding: 20px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
+               ),
+               column(6, #hispanic
+                      plotlyOutput("enroll_plot4", height = "550px"),
+                      style = "padding: 20px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
                )
-             )
+               )
     ),
     tabPanel("Mapping",
              sidebarLayout(
                sidebarPanel(
-                 selectInput("variable", "Select Variable", choices = my_variables_income)
+                 selectInput("variable", "Select Race", choices = c("Black", "Hispanic", "Asian", "White"))
                ),
                mainPanel(
                  leafletOutput("map")
@@ -381,6 +397,7 @@ server <- function(input, output) {
       variable <- input$variable
       d_acs[[variable]]
     })
+  
   
 #--GRAD TRENDS PLOT--  
   output$grad_trends_plot <- renderPlotly({
@@ -444,7 +461,7 @@ server <- function(input, output) {
       ggplot(aes(x = reorder(County, collegeE), y = collegeE)) +
       geom_col(alpha = 0.8, width = 0.7, fill = "#9ecae1") +  
       theme_few() + 
-      labs(title = "Income of MA Families by Educational Attainment", 
+      labs(title = "Income of MA Families with a Bachelor's Degree or higher", 
            subtitle = "Bachelor's Degree or higher", 
            y = "Average Income",  
            x = "County",
@@ -506,39 +523,166 @@ server <- function(input, output) {
       layout( xaxis = list(tickfont = list(size = 9)))
   })
   
-#--RACE ENROLLMENT TABLE--
-
+#--RACE ENROLLMENT PLOT: WHITE--
+   output$enroll_plot1 <- renderPlotly({
+      enroll_fig1 <- plot_ly(data = d_enrollment, 
+                             x = ~district_name, 
+                             y = ~White, 
+                             type = 'scatter',
+                             text = paste("District:", d_enrollment$district_name,
+                                          "<br>Enrollment:", d_enrollment$White,"%"),
+                             hoverinfo = 'text',
+                             mode = 'markers',
+                             marker = list(color = '#70569C')
+      ) %>%
+        layout(title = 'Enrollment of White Students by School District',
+               plot_bgcolor='#F4EEFE',
+               margin = list(
+                 b = 50,
+                 t = 50),
+               xaxis = list(
+                 title = 'Districts',
+                 zerolinecolor = '#ffff',
+                 zerolinewidth = 2,
+                 gridcolor = 'ffff',
+                 showticklabels=FALSE),
+               yaxis = list(
+                 title = 'Percentage Enrollment',
+                 zerolinecolor = '#ffff',
+                 zerolinewidth = 2,
+                 gridcolor = 'ffff'))
+      })
+  
+#--RACE ENROLLMENT PLOT: BLACK--
+   output$enroll_plot2 <- renderPlotly({
+     enroll_fig1 <- plot_ly(data = d_enrollment, 
+                            x = ~district_name, 
+                            y = ~Black, 
+                            type = 'scatter',
+                            text = paste("District:", d_enrollment$district_name,
+                                         "<br>Enrollment:", d_enrollment$Black,"%"),
+                            hoverinfo = 'text',
+                            mode = 'markers',
+                            marker = list(color = '#70569C')
+     ) %>%
+       layout(title = 'Enrollment of Black Students by School District',
+              plot_bgcolor='#F4EEFE',
+              margin = list(
+                b = 50,
+                t = 50),
+              xaxis = list(
+                title = 'Districts',
+                zerolinecolor = '#ffff',
+                zerolinewidth = 2,
+                gridcolor = 'ffff',
+                showticklabels=FALSE),
+              yaxis = list(
+                title = 'Percentage Enrollment',
+                zerolinecolor = '#ffff',
+                zerolinewidth = 2,
+                gridcolor = 'ffff'))
+   })
+  
+#--RACE ENROLLMENT PLOT: ASIAN--
+   output$enroll_plot3 <- renderPlotly({
+     enroll_fig1 <- plot_ly(data = d_enrollment, 
+                            x = ~district_name, 
+                            y = ~Asian, 
+                            type = 'scatter',
+                            text = paste("District:", d_enrollment$district_name,
+                                         "<br>Enrollment:", d_enrollment$Asian,"%"),
+                            hoverinfo = 'text',
+                            mode = 'markers',
+                            marker = list(color = '#70569C')
+     ) %>%
+       layout(title = 'Enrollment of Asian Students by School District',
+              plot_bgcolor='#F4EEFE',
+              margin = list(
+                b = 50,
+                t = 50),
+              xaxis = list(
+                title = 'Districts',
+                zerolinecolor = '#ffff',
+                zerolinewidth = 2,
+                gridcolor = 'ffff',
+                showticklabels=FALSE),
+              yaxis = list(
+                title = 'Percentage Enrollment',
+                zerolinecolor = '#ffff',
+                zerolinewidth = 2,
+                gridcolor = 'ffff'))
+   })  
+  
+#--RACE ENROLLMENT PLOT: HISPANIC--
+   output$enroll_plot4 <- renderPlotly({
+     enroll_fig1 <- plot_ly(data = d_enrollment, 
+                            x = ~district_name, 
+                            y = ~Hispanic, 
+                            type = 'scatter',
+                            text = paste("District:", d_enrollment$district_name,
+                                         "<br>Enrollment:", d_enrollment$Hispanic,"%"),
+                            hoverinfo = 'text',
+                            mode = 'markers',
+                            marker = list(color = '#70569C')
+     ) %>%
+       layout(title = 'Enrollment of Hispanic Students by School District',
+              plot_bgcolor='#F4EEFE',
+              margin = list(
+                b = 50,
+                t = 50),
+              xaxis = list(
+                title = 'Districts',
+                zerolinecolor = '#ffff',
+                zerolinewidth = 2,
+                gridcolor = 'ffff',
+                showticklabels=FALSE),
+              yaxis = list(
+                title = 'Percentage Enrollment',
+                zerolinecolor = '#ffff',
+                zerolinewidth = 2,
+                gridcolor = 'ffff'))
+   })
   
 #--INCOME MAP--  
-    output$map <- renderLeaflet({
-      variable <- input$variable
-      leaflet(data = d_acs) %>%
-        addTiles() %>%
-        addPolygons(
-          fillColor = ~colorNumeric(palette = "Greens", domain = d_acs$estimate)(estimate),
+  output$map <- renderLeaflet({
+    race_variable <- input$variable  
+    
+    avg_income <- d_acs %>%
+      filter(variable == race_variable) %>%
+      group_by(NAME) %>%
+      summarize(average_income = mean(estimate, na.rm = TRUE))
+    
+    overall_min <- min(avg_income$average_income, na.rm = TRUE)
+    overall_max <- max(avg_income$average_income, na.rm = TRUE)
+    
+    leaflet(data = avg_income) %>%
+      addTiles() %>%
+      addPolygons(
+        fillColor = ~colorNumeric(palette = "Greens", domain = c(overall_min, overall_max))(average_income),
+        fillOpacity = 0.7,
+        weight = 1,
+        highlight = highlightOptions(
+          weight = 5,
           fillOpacity = 0.7,
-          weight = 1,
-          highlight = highlightOptions(
-            weight = 5,
-            fillOpacity = 0.7,
-            bringToFront = TRUE
-          ),
-          label = ~paste(NAME,"\n", "Average Income:", estimate, selected_variable()),
-          labelOptions = labelOptions(
-            style = list("font-weight" = "normal", padding = "3px 8px"),
-            textsize = "15px",
-            direction = "auto"
-          )
-        ) %>%
-        addLegend(
-          position = "topright",
-          pal = colorQuantile("Greens", selected_variable()),
-          values = d_acs$estimate,
-          title = "ACS Estimate, 2022",
-          labFormat = labelFormat(suffix = ""),
-          opacity = 1
-        ) 
-    })
+          bringToFront = TRUE
+        ),
+        label = ~paste(NAME,"\n", "Average Income:", round(average_income, 2)),
+        labelOptions = labelOptions(
+          style = list("font-weight" = "normal", padding = "3px 8px"),
+          textsize = "15px",
+          direction = "auto"
+        )
+      ) %>%
+      addLegend(
+        position = "topright",
+        pal = colorNumeric("Greens", domain = c(overall_min, overall_max)),
+        values = avg_income$average_income,
+        title = "ACS Estimate, 2022",
+        labFormat = labelFormat(suffix = ""),
+        opacity = 1
+      ) 
+  })
+  
 }
 
 shinyApp(ui = ui, server = server)
