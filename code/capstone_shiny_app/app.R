@@ -298,7 +298,7 @@ ui <- fluidPage(
                     column(2),
                     column(8, 
                            br(),
-                           HTML("<p>For decades,  Massachusetts public schools system have remained highly divided—chiefly by class and race. As <a href='https://www.bostonglobe.com/2020/12/11/opinion/massachusetts-public-schools-are-highly-segregated-its-time-we-treated-that-like-crisis-it-is/' target='_blank'>The Boston Globe</a> 
+                           HTML("<p>For decades,  Massachusetts public schools system have remained highly divided—chiefly by class and race. As <a href='https://www.bostonglobe.com/2022/05/07/metro/massachusetts-is-segregated-heres-why/' target='_blank'>The Boston Globe</a> 
                            has reported on for years, the state has not worked to adequately integrate its schools, nor has it addressed a myriad of housing reform issues: from the legacy of redlining in, which has racialized neighborhoods and zipcodes, to affordable housing, to whether or not Black or Hispanic families will even reecieve a loan from local banks.
                            With 2024 being the 50th anniversary of the Boston Busing Crisis, in which a federal court mandted that  certain schools in the city of Boston integrate through busing, sparking racial protests, violence, and white flight into the suburbs, my project aims to examine how segregation continues to manifest itself in the state's public education sytem.
                            <br><br>
@@ -323,8 +323,8 @@ ui <- fluidPage(
                       style = "height: 50px;" 
                ),
                column(12,
-                      HTML("<h3 style='font-size: 20px;'>This table displays the districts with the top 10 best achievment scores from the state math exam (MCAS).</h3>
-                            <p style='font-size: 17px;'>The breakdown in racial makeup in these districts highlight the geographic divide in race, income, and achievement.</p>"),                     
+                      HTML("<h3 style='font-size: 24px;'>Top 10 School Districts by MCAS Scores</h3>
+                            <p style='font-size: 16px;'>This table breaks down the racial makeup of the districts with the highest achievement scores on the 2023 statewide math MCAS exam, highlighting the geographic divide in race, income, and achievement in Massachusetts.</p>"),                     
                       DTOutput("enrollment_table"),
                       style = "padding: 20px; background-color: #f8f9fa; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);"
                ),
@@ -372,6 +372,10 @@ ui <- fluidPage(
                  selectInput("variable", "Select Race", choices = c("Black", "Hispanic", "Asian", "White"))
                ),
                mainPanel(
+                 strong("Average Income by Race in MA", style = "font-size:25px;"),
+                 p("Select from the dropdown to see how the average income changes depeneding on race", style = "font-size:18px;"),
+                 # p("Select from the dropdown to see how the average income of a group"),
+         
                  leafletOutput("map")
                )
              )
